@@ -26,3 +26,4 @@ appVersion: "1.16.0"
 maintainers:
   - name: Rob Coward
     email: rob@oso.sh
+    url: https://github.com/robcoward

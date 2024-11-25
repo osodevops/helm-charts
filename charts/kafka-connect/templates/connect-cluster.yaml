@@ -18,9 +18,16 @@ spec:
   replicas: {{ $config.replicas | default $global.replicas }}
   bootstrapServers: {{ $.Values.kafka.bootstrapServers }}
   template:
-    serviceAccount:
-      metadata:
-        name: {{ include "kafka-connect.serviceAccountName" $ }}
+    pod:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
   config:
     group.id: {{ $config.groupId | default $connect_name }}
     config.providers: {{ $config.providersClass | keys | join ", " }}

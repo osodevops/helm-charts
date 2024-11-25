@@ -1,0 +1,28 @@
+{{- $global := .Values.global }}
+{{- range $cluster, $config := .Values.clusters }}
+{{- $connect_name := (printf "%s-%s" (include "kafka-connect.name" $) $cluster) }}
+{{- range $connector, $connector_config := $config.connectors -}}
+{{- $topic := $connector_config.topic | default (printf "%s-%s" $connect_name $connector) -}}
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: {{ $connect_name }}-{{ $connector }}
+  labels:
+    strimzi.io/cluster: {{ $connect_name }}
+spec:
+  class: {{ $connector_config.class }}
+  config:
+    kafka.topic: {{ $topic }}
+    confluent.topic.sasl.mechanism: {{ $.Values.kafka.saslMechanism }}
+    confluent.topic.sasl.jaas.config: {{ $.Values.kafka.saslJaasConfig }}
+    confluent.topic.sasl.client.callback.handler.class: {{ $.Values.kafka.saslClientCallbackHandler }}
+    confluent.topic.security.protocol: {{ $.Values.kafka.securityProtocol }}
+    confluent.topic.bootstrap.servers: {{ $.Values.kafka.bootstrapServers }}
+    confluent.topic.replication.factor: 3
+    confluent.license: {{ $global.confluentLicense | quote }}
+    {{- range $key, $value := $connector_config.config }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+---
+{{- end }}
+{{- end }}

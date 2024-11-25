@@ -1,0 +1,85 @@
+global:
+  replicationFactor: 3
+  replicas: 1
+  configTopicPrefix: __connect-cluster
+  version: 3.8.0
+  jvmOptions:
+    "-Xms": "256M"
+    "-Xmx": "2G"
+  confluentLicense: ""
+  secretStore: aws-secretsmanager
+  secretStoreKind: ClusterSecretStore
+  refreshInterval: 1h
+
+image: sionsmith/oso-strimzi-kafka-operator-iam-auth:0.38.0-kafka-3.6.0-aws-latest
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+kafka:
+  bootstrapServers: "broker1:9098,broker2:9098"
+  saslMechanism: "AWS_MSK_IAM"
+  saslJaasConfig: "software.amazon.msk.auth.iam.IAMLoginModule required;"
+  saslClientCallbackHandler: "software.amazon.msk.auth.iam.IAMClientCallbackHandler"
+  securityProtocol: "SASL_SSL"
+
+# ExternalSecrets configuration
+secrets:
+  # credentials:
+  #   awsSecret: connector-credentials
+  #   keys:
+  #     # Mapping the k8s secret key to the AWS secret key
+  #     username: username-key-in-aws-secret
+  #     password: password-key-in-aws-secret
+
+# Kafka Connect Clusters configuration
+clusters:
+  # default:
+  #   # Uses global defaults if not set.
+  #   # replicas: 1
+  #   # version: 3.8.0
+  #   # jvmOptions:
+  #   #   "-Xms": "256M"
+  #   #   "-Xmx": "2G"
+  #   # If not set, a name is generated using the fullname template
+  #   groupId: ""
+  #   topics:
+  #     config:
+  #       replicationFactor: 3
+  #       # If not set, a name is generated using the fullname template
+  #       topic: ""
+  #     offset:
+  #       replicationFactor: 3
+  #       # If not set, a name is generated using the fullname template
+  #       topic: ""
+  #     status:
+  #       replicationFactor: 3
+  #       # If not set, a name is generated using the fullname template
+  #       topic: ""
+  #   providersClass:
+  #     directory: org.apache.kafka.common.config.provider.DirectoryConfigProvider
+  #     secrets: io.strimzi.kafka.KubernetesSecretConfigProvider
+  #     configmaps: io.strimzi.kafka.KubernetesConfigMapConfigProvider
+
+  #   connectors:
+  #     default:
+  #       # If not set, a topic name is generated using the fullname template
+  #       topic: example-topic
+  #       class: io.confluent.connect.servicenow.ServiceNowSourceConnector
+  #       config:
+  #         tasks.max: 1
+  #         key.converter: org.apache.kafka.connect.json.JsonConverter
+  #         value.converter: org.apache.kafka.connect.json.JsonConverter
+  #         servicenow.url: https://customer.service-now.com/
+  #         servicenow.table: sn_customerservice_case
+  #         servicenow.user: ${secrets:kafka/credentials:snow-username}
+  #         servicenow.password: ${secrets:kafka/credentials:snow-password}
+  #         servicenow.since: "2022-01-01"

@@ -1,0 +1,32 @@
+{{- $global := .Values.global }}
+{{- range $cluster, $config := .Values.clusters }}
+{{- $connect_name := (printf "%s-%s" (include "kafka-connect.name" $) $cluster) }}
+{{- $jvmOptions := $config.jvmOptions | default $global.jvmOptions -}}
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: {{ $connect_name }}
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  image: {{ $.Values.image }}
+  jvmOptions:
+    {{- range $opt, $value := $jvmOptions }}
+    {{ $opt | quote }}: {{ $value | quote }}
+    {{- end }}
+  version: {{ $config.version | default $global.version }}
+  replicas: {{ $config.replicas | default $global.replicas }}
+  bootstrapServers: {{ $.Values.kafka.bootstrapServers }}
+  template:
+    serviceAccount:
+      metadata:
+        name: {{ include "kafka-connect.serviceAccountName" $ }}
+  config:
+    group.id: {{ $config.groupId | default $connect_name }}
+    config.providers: {{ $config.providersClass | keys | join ", " }}
+    {{- range $provider, $class := $config.providersClass }}
+    config.providers.{{ $provider }}.class: {{ $class }}
+    {{- end }}
+{{- include "kafka-connect.storageConfig"  (dict "global" $global "config" $config "clustername" $connect_name) | indent 4}}
+---
+{{- end }}

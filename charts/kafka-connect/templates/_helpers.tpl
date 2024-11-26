@@ -69,8 +69,10 @@ Create the name of the config topic to use
 {{- $config := .config -}}
 {{- $clustername := .clustername -}}
 {{- $topic_prefix := (printf "%s-%s" $global.configTopicPrefix $clustername) -}}
-{{- range $topic, $topic_config := $config.topics }}
-{{ $topic }}.storage.replication.factor: {{ $topic_config.replicationFactor | default $global.replicationFactor }}
+{{- $topic_configs := $config.topics | default $global.topics }}
+{{- range $topic, $topic_defaults := $global.topics }}
+{{- $topic_config := index $topic_configs $topic | default $topic_defaults }}
+{{ $topic }}.storage.replication.factor: {{ $topic_config.replicationFactor | default $topic_defaults.replicationFactor }}
 {{ $topic }}.storage.topic: {{ $topic_config.topic | default (printf "%s-%s" $topic_prefix $topic) }}
 {{- end }}
 {{- end }}

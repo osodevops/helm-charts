@@ -1,5 +1,4 @@
 global:
-  replicationFactor: 3
   replicas: 1
   configTopicPrefix: __connect-cluster
   version: 3.8.0
@@ -10,6 +9,13 @@ global:
   secretStore: aws-secretsmanager
   secretStoreKind: ClusterSecretStore
   refreshInterval: 1h
+  topics:
+    config:
+      replicationFactor: 3
+    offset:
+      replicationFactor: 3
+    status:
+      replicationFactor: 3
 
 image: sionsmith/oso-strimzi-kafka-operator-iam-auth:0.38.0-kafka-3.6.0-aws-latest
 

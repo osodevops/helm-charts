@@ -18,14 +18,14 @@ ingress:
     nginx.ingress.kubernetes.io/rewrite-target: /
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
-    - host: test.api.m2r3.co
+    - host: example.com
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls:
     - secretName: test-eventcatalog
       hosts:
-        - test.api.m2r3.co
+        - example.com
 
 resources:
   requests:

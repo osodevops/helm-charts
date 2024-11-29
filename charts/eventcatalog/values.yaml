@@ -4,7 +4,7 @@ image:
   # Container image with the static site built
   repository: quay.io/osodevops/eventcatalog
   # If not specified, defaults to .Chart.AppVersion
-  tag: "" 
+  tag: ""
   pullPolicy: IfNotPresent
 service:
   type: ClusterIP

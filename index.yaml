@@ -1,5 +1,18 @@
 apiVersion: v1
 entries:
+  eventcatalog:
+  - apiVersion: v2
+    appVersion: 1.0.1
+    created: "2024-11-29T11:11:21.938416175Z"
+    description: A Helm chart for deploying EventCatalog's static site
+    digest: e18c139b4effd0e5487909399fa67fc3276f4842362bdf0e3ffb86413fabd260
+    maintainers:
+    - name: oso
+    name: eventcatalog
+    type: application
+    urls:
+    - https://github.com/osodevops/helm-charts/releases/download/eventcatalog-0.1.0/eventcatalog-0.1.0.tgz
+    version: 0.1.0
   kafka-connect:
   - apiVersion: v2
     appVersion: 1.16.0
@@ -61,4 +74,4 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/kafka-connect-0.1.1/kafka-connect-0.1.1.tgz
     version: 0.1.1
-generated: "2024-11-26T10:20:51.332710825Z"
+generated: "2024-11-29T11:11:21.938437936Z"

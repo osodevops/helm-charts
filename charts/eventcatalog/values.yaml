@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   name: eventcatalog
-  # Container image with the static site built
+  # Container image with static EventCatalog demo built
   repository: quay.io/osodevops/eventcatalog
   # If not specified, defaults to .Chart.AppVersion
   tag: ""

@@ -31,9 +31,9 @@ serviceAccount:
   name: ""
 
 monitoring:
-  enabled: true
+  enabled: false
   podMonitor:
-    enabled: true
+    enabled: false
 
 kafka:
   bootstrapServers: "broker1:9098,broker2:9098"

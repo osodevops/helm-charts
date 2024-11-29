@@ -28,6 +28,14 @@ spec:
                     operator: In
                     values:
                       - amd64
+{{- if $.Values.monitoring.enabled }}                      
+  metricsConfig:
+    type: jmxPrometheusExporter
+    valueFrom:
+      configMapKeyRef:
+        name: {{ printf "%s-metrics" (include "kafka-connect.name" $) }}
+        key: metrics-config.yml
+{{ end }}
   config:
     group.id: {{ $config.groupId | default $connect_name }}
     config.providers: {{ $config.providersClass | keys | join ", " }}

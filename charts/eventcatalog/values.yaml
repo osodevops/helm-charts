@@ -1,0 +1,35 @@
+replicaCount: 1
+image:
+  name: eventcatalog
+  # Container image with static EventCatalog demo built
+  repository: quay.io/osodevops/eventcatalog
+  # If not specified, defaults to .Chart.AppVersion
+  tag: ""
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  # Default port for the service
+  port: 80
+ingress:
+  enabled: true
+  domain: true
+  ingressClass: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: test-eventcatalog
+      hosts:
+        - example.com
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "500m"
+  limits:
+    memory: "512Mi"
+    cpu: "1"

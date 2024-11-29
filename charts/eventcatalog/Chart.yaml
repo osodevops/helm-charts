@@ -1,0 +1,8 @@
+apiVersion: v2
+name: eventcatalog
+description: A Helm chart for deploying EventCatalog's static site
+type: application
+version: 0.1.0
+appVersion: "1.0.1"
+maintainers:
+  - name: oso

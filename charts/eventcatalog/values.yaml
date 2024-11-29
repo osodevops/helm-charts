@@ -1,20 +1,20 @@
 replicaCount: 1
-
 image:
   name: eventcatalog
-  repository: quay.io/osodevops/eventcatalog # Container image with the static site built
-  tag: "" # If not specified, defaults to .Chart.AppVersion
+  # Container image with the static site built
+  repository: quay.io/osodevops/eventcatalog
+  # If not specified, defaults to .Chart.AppVersion
+  tag: "" 
   pullPolicy: IfNotPresent
-
 service:
   type: ClusterIP
-  port: 80 # Default port for the service
-
+  # Default port for the service
+  port: 80
 ingress:
   enabled: true
   domain: true
   ingressClass: nginx
-  annotations: 
+  annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
@@ -26,7 +26,6 @@ ingress:
     - secretName: test-eventcatalog
       hosts:
         - example.com
-
 resources:
   requests:
     memory: "256Mi"

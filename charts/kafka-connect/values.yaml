@@ -30,6 +30,11 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+monitoring:
+  enabled: false
+  podMonitor:
+    enabled: false
+
 kafka:
   bootstrapServers: "broker1:9098,broker2:9098"
   saslMechanism: "AWS_MSK_IAM"

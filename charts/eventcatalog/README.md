@@ -96,7 +96,7 @@ ingress:
   hosts:
     - paths:
         - path: /eventcatalog
-          pathType: ImplementationSpecific
+          pathType: Prefix
   tls: []
 
 ```

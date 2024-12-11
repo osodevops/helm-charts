@@ -11,8 +11,8 @@ service:
   # Default port for the service
   port: 80
 ingress:
-  enabled: true
-  domain: true
+  enabled: false
+  domain: false
   ingressClass: nginx
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /

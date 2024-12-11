@@ -1,0 +1,6 @@
+ingress:
+  enabled: true
+  ingressClass: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-prod

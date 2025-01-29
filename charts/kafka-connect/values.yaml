@@ -5,7 +5,7 @@ global:
       memory: 512Mi
       cpu: "0.5"
     limits:
-      memory: 1Gi
+      memory: 2Gi
       cpu: "1"
   configTopicPrefix: __connect-cluster
   version: 3.8.0

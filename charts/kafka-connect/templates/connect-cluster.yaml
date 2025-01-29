@@ -17,12 +17,11 @@ spec:
   version: {{ $config.version | default $global.version }}
   replicas: {{ $config.replicas | default $global.replicas }}
   resources:
-    requests:
-      memory: {{ $config.resources.requests.memory | default $global.resources.requests.memory }}
-      cpu: {{ $config.resources.requests.cpu | default $global.resources.requests.cpu }}
-    limits:
-      memory: {{ $config.resources.limits.memory | default $global.resources.limits.memory }}
-      cpu: {{ $config.resources.limits.cpu | default $global.resources.limits.cpu }}
+  {{- if $config.resources -}}
+    {{ $config.resources | toYaml | nindent 4 }}
+  {{- else -}}
+    {{ $global.resources | toYaml | nindent 4 }}
+  {{- end }}
   bootstrapServers: {{ $.Values.kafka.bootstrapServers }}
   template:
     pod:

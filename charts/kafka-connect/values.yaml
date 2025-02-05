@@ -86,6 +86,11 @@ clusters:
   #     directory: org.apache.kafka.common.config.provider.DirectoryConfigProvider
   #     secrets: io.strimzi.kafka.KubernetesSecretConfigProvider
   #     configmaps: io.strimzi.kafka.KubernetesConfigMapConfigProvider
+  #   ingress:
+  #     enabled: false
+  #     annotations: {}
+  #     ingressClass: ""
+  #     hosts: []
 
   #   connectors:
   #     default:

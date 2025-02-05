@@ -12,7 +12,7 @@ metadata:
     {{ $key }}: {{ $value | quote }}
     {{- end }}
 spec:
-  {{- if $config.ingress.ingressClass -}}
+  {{- if $config.ingress.ingressClass }}
   ingressClassName: {{ $config.ingress.ingressClass }}
   {{- end }}
   rules:

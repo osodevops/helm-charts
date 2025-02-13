@@ -23,7 +23,19 @@ spec:
     {{ $global.resources | toYaml | nindent 4 }}
   {{- end }}
   bootstrapServers: {{ $.Values.kafka.bootstrapServers }}
+{{- if $.Values.opentelemetry.enabled }}
+  tracing:
+    type: opentelemetry  
+{{ end }}
   template:
+{{- if $.Values.opentelemetry.enabled }}
+    connectContainer:
+      env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: {{ $.Values.opentelemetry.otlpEndpoint }}
+        - name: OTEL_SERVICE_NAME
+          value: {{ $.Values.opentelemetry.serviceName }}
+{{ end }}
     pod:
       affinity:
         podAntiAffinity:

@@ -41,6 +41,10 @@ monitoring:
   enabled: false
   podMonitor:
     enabled: false
+opentelemetry:
+  enabled: false
+  otlpEndpoint: "http://otel-collector:4317"
+  serviceName: "kafka-connect"
 
 kafka:
   bootstrapServers: "broker1:9098,broker2:9098"

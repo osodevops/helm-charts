@@ -31,10 +31,16 @@ spec:
 {{- if $.Values.opentelemetry.enabled }}
     connectContainer:
       env:
+{{- range $.Values.env }}
+        - name: {{ .name }}
+          value: {{ .value | quote }}
+{{- end }}
+{{- if $.Values.opentelemetry.enabled }}
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: {{ $.Values.opentelemetry.otlpEndpoint }}
         - name: OTEL_SERVICE_NAME
           value: {{ $.Values.opentelemetry.serviceName }}
+{{- end }}
 {{ end }}
     pod:
       affinity:

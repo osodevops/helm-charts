@@ -41,6 +41,7 @@ monitoring:
   enabled: false
   podMonitor:
     enabled: false
+
 opentelemetry:
   enabled: false
   otlpEndpoint: "http://otel-collector:4317"
@@ -52,6 +53,12 @@ kafka:
   saslJaasConfig: "software.amazon.msk.auth.iam.IAMLoginModule required;"
   saslClientCallbackHandler: "software.amazon.msk.auth.iam.IAMClientCallbackHandler"
   securityProtocol: "SASL_SSL"
+
+#env:
+#  - name: AWS_ROLE_SESSION_NAME >> https://github.com/tulios/kafkajs/issues/1582
+#    value: "foobar"
+#  - name: OTEL_METRICS_EXPORTER
+#    value: "none"
 
 # ExternalSecrets configuration
 secrets:

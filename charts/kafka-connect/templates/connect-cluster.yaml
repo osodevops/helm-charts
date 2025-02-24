@@ -28,14 +28,21 @@ spec:
     type: opentelemetry  
 {{ end }}
   template:
-{{- if $.Values.opentelemetry.enabled }}
     connectContainer:
       env:
+{{- range $.Values.env }}
+        - name: {{ .name }}
+          value: {{ .value | quote }}
+{{- end }}
+{{- if $.Values.opentelemetry.enabled }}
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: {{ $.Values.opentelemetry.otlpEndpoint }}
         - name: OTEL_SERVICE_NAME
           value: {{ $.Values.opentelemetry.serviceName }}
-{{ end }}
+{{- else }}
+        - name: OTEL_METRICS_EXPORTER
+          value: "none"
+{{- end }}
     pod:
       affinity:
         podAntiAffinity:

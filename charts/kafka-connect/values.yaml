@@ -110,39 +110,39 @@ clusters:
   #     ingressClass: ""
   #     hosts: []
 
-  #     connectors:
-  #       default:
-  #         # If not set, a topic name is generated using the fullname template
-  #         topic: example-topic
-  #         class: io.confluent.connect.servicenow.ServiceNowSourceConnector
-  #         config:
-  #           tasks.max: 1
-  #           key.converter: org.apache.kafka.connect.json.JsonConverter
-  #           value.converter: org.apache.kafka.connect.json.JsonConverter
-  #           servicenow.url: https://customer.service-now.com/
-  #           servicenow.table: sn_customerservice_case
-  #           servicenow.user: ${secrets:kafka/credentials:snow-username}
-  #           servicenow.password: ${secrets:kafka/credentials:snow-password}
-  #           servicenow.since: "2022-01-01"
-  #
-  #     debeziumConnectors:
-  #      sharedConfig:
-  #        topic.prefix: "plt"
-  #        include.schema.changes: "true"
-  #        transforms: "Route"
-  #        transforms.Route.regex: "^[^.]*\\.[^.]*\\.(.*)"
-  #        transforms.Route.type: "org.apache.kafka.connect.transforms.RegexRouter"
-  #        transforms.Route.replacement: "pub-plt-$1"
-  #
-  #      connectors:
-  #        mysql-ho-pci-form:
-  #          snapshot.mode: "no_data"
-  #          database.server.id: "1002"
-  #          schema.history.internal.kafka.topic: "liferay_dev-schema-ho-pci-form"
-  #          table.include.list: "liferay_dev.ho_pci_form"
-  #
-  #        mysql-ho-site-extra:
-  #          snapshot.mode: "no_data"
-  #          database.server.id: "1003"
-  #          schema.history.internal.kafka.topic: "liferay_dev-schema-ho-site-extra"
-  #          table.include.list: "liferay_dev.ho_site_extra"
+#       connectors:
+#         default:
+#           # If not set, a topic name is generated using the fullname template
+#           topic: example-topic
+#           class: io.confluent.connect.servicenow.ServiceNowSourceConnector
+#           config:
+#             tasks.max: 1
+#             key.converter: org.apache.kafka.connect.json.JsonConverter
+#             value.converter: org.apache.kafka.connect.json.JsonConverter
+#             servicenow.url: https://customer.service-now.com/
+#             servicenow.table: sn_customerservice_case
+#             servicenow.user: ${secrets:kafka/credentials:snow-username}
+#             servicenow.password: ${secrets:kafka/credentials:snow-password}
+#             servicenow.since: "2022-01-01"
+#
+#       debeziumConnectors:
+#        sharedConfig:
+#          topic.prefix: "plt"
+#          include.schema.changes: "true"
+#          transforms: "Route"
+#          transforms.Route.regex: "^[^.]*\\.[^.]*\\.(.*)"
+#          transforms.Route.type: "org.apache.kafka.connect.transforms.RegexRouter"
+#          transforms.Route.replacement: "pub-plt-$1"
+#
+#        connectors:
+#          mysql-ho-pci-form:
+#            snapshot.mode: "no_data"
+#            database.server.id: "1002"
+#            schema.history.internal.kafka.topic: "liferay_dev-schema-ho-pci-form"
+#            table.include.list: "liferay_dev.ho_pci_form"
+#
+#          mysql-ho-site-extra:
+#            snapshot.mode: "no_data"
+#            database.server.id: "1003"
+#            schema.history.internal.kafka.topic: "liferay_dev-schema-ho-site-extra"
+#            table.include.list: "liferay_dev.ho_site_extra"

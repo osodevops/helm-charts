@@ -16,13 +16,13 @@ spec:
   class: {{ $connector_config.class }}
   config:
     kafka.topic: {{ $topic }}
-    bootstrap.servers: {{ $.Values.kafka.bootstrapServers }}
-    security.protocol: {{ $.Values.kafka.securityProtocol }}
-    sasl.mechanism: {{ $.Values.kafka.saslMechanism }}
-    sasl.jaas.config: {{ $.Values.kafka.saslJaasConfig }}
-    sasl.client.callback.handler.class: {{ $.Values.kafka.saslClientCallbackHandler }}
-    replication.factor: 3
-    license: {{ $global.confluentLicense | quote }}
+    confluent.topic.sasl.mechanism: {{ $.Values.kafka.saslMechanism }}
+    confluent.topic.sasl.jaas.config: {{ $.Values.kafka.saslJaasConfig }}
+    confluent.topic.sasl.client.callback.handler.class: {{ $.Values.kafka.saslClientCallbackHandler }}
+    confluent.topic.security.protocol: {{ $.Values.kafka.securityProtocol }}
+    confluent.topic.bootstrap.servers: {{ $.Values.kafka.bootstrapServers }}
+    confluent.topic.replication.factor: 3
+    confluent.license: {{ $global.confluentLicense | quote }}
     {{- range $key, $value := $connector_config.config }}
     {{ $key }}: {{ $value }}
     {{- end }}

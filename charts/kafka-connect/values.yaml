@@ -57,10 +57,10 @@ kafka:
 debezium_database:
   class: "io.debezium.connector.mysql.MySqlConnector"
   hostname: "your-mysql-server.eu-west-1.rds.amazonaws.com"
-  user: ${secrets:kafka/infinity-creds:db-username}
-  password: ${secrets:kafka/infinity-creds:db-password}
+  user: ${secrets:kafka/secret-creds:db-username}
+  password: ${secrets:kafka/secret-creds:db-password}
   port: "3306"
-  db_name: "liferay_dev"
+  db_name: "your_database"
 
 
 # env:
@@ -139,10 +139,10 @@ clusters:
 #            snapshot.mode: "no_data"
 #            database.server.id: "1002"
 #            schema.history.internal.kafka.topic: "database-schema-table-1"
-#            table.include.list: "database.table_name_1"
+#            table.include.list: "your_database.table_name_1"
 #
 #          mysql-table-2
 #            snapshot.mode: "no_data"
 #            database.server.id: "1003"
 #            schema.history.internal.kafka.topic: "database-schema-table-2"
-#            table.include.list: "database.table_name_2"
+#            table.include.list: "your_database.table_name_2"

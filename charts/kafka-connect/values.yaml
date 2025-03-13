@@ -56,7 +56,7 @@ kafka:
 
 debezium_database:
   class: "io.debezium.connector.mysql.MySqlConnector"
-  hostname: "infinitymysql8-replica.caqc3cscg7qf.eu-west-1.rds.amazonaws.com"
+  hostname: "your-mysql-server.eu-west-1.rds.amazonaws.com"
   user: ${secrets:kafka/infinity-creds:db-username}
   password: ${secrets:kafka/infinity-creds:db-password}
   port: "3306"

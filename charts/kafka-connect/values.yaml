@@ -132,17 +132,17 @@ clusters:
 #          transforms: "Route"
 #          transforms.Route.regex: "^[^.]*\\.[^.]*\\.(.*)"
 #          transforms.Route.type: "org.apache.kafka.connect.transforms.RegexRouter"
-#          transforms.Route.replacement: "pub-plt-$1"
+#          transforms.Route.replacement: "foo-bar-$1"
 #
 #        connectors:
-#          mysql-ho-pci-form:
+#          mysql-table-1:
 #            snapshot.mode: "no_data"
 #            database.server.id: "1002"
-#            schema.history.internal.kafka.topic: "liferay_dev-schema-ho-pci-form"
-#            table.include.list: "liferay_dev.ho_pci_form"
+#            schema.history.internal.kafka.topic: "database-schema-table-1"
+#            table.include.list: "database.table_name_1"
 #
-#          mysql-ho-site-extra:
+#          mysql-table-2
 #            snapshot.mode: "no_data"
 #            database.server.id: "1003"
-#            schema.history.internal.kafka.topic: "liferay_dev-schema-ho-site-extra"
-#            table.include.list: "liferay_dev.ho_site_extra"
+#            schema.history.internal.kafka.topic: "database-schema-table-2"
+#            table.include.list: "database.table_name_2"

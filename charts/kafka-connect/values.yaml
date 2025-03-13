@@ -54,6 +54,15 @@ kafka:
   saslClientCallbackHandler: "software.amazon.msk.auth.iam.IAMClientCallbackHandler"
   securityProtocol: "SASL_SSL"
 
+debezium_database:
+  class: "io.debezium.connector.mysql.MySqlConnector"
+  hostname: "your-mysql-server.eu-west-1.rds.amazonaws.com"
+  user: ${secrets:kafka/secret-creds:db-username}
+  password: ${secrets:kafka/secret-creds:db-password}
+  port: "3306"
+  db_name: "your_database"
+
+
 # env:
 #  - name: AWS_ROLE_SESSION_NAME >> https://github.com/tulios/kafkajs/issues/1582
 #    value: "foobar"
@@ -101,17 +110,39 @@ clusters:
   #     ingressClass: ""
   #     hosts: []
 
-  #   connectors:
-  #     default:
-  #       # If not set, a topic name is generated using the fullname template
-  #       topic: example-topic
-  #       class: io.confluent.connect.servicenow.ServiceNowSourceConnector
-  #       config:
-  #         tasks.max: 1
-  #         key.converter: org.apache.kafka.connect.json.JsonConverter
-  #         value.converter: org.apache.kafka.connect.json.JsonConverter
-  #         servicenow.url: https://customer.service-now.com/
-  #         servicenow.table: sn_customerservice_case
-  #         servicenow.user: ${secrets:kafka/credentials:snow-username}
-  #         servicenow.password: ${secrets:kafka/credentials:snow-password}
-  #         servicenow.since: "2022-01-01"
+#       connectors:
+#         default:
+#           # If not set, a topic name is generated using the fullname template
+#           topic: example-topic
+#           class: io.confluent.connect.servicenow.ServiceNowSourceConnector
+#           config:
+#             tasks.max: 1
+#             key.converter: org.apache.kafka.connect.json.JsonConverter
+#             value.converter: org.apache.kafka.connect.json.JsonConverter
+#             servicenow.url: https://customer.service-now.com/
+#             servicenow.table: sn_customerservice_case
+#             servicenow.user: ${secrets:kafka/credentials:snow-username}
+#             servicenow.password: ${secrets:kafka/credentials:snow-password}
+#             servicenow.since: "2022-01-01"
+#
+#       debeziumConnectors:
+#        sharedConfig:
+#          topic.prefix: "plt"
+#          include.schema.changes: "true"
+#          transforms: "Route"
+#          transforms.Route.regex: "^[^.]*\\.[^.]*\\.(.*)"
+#          transforms.Route.type: "org.apache.kafka.connect.transforms.RegexRouter"
+#          transforms.Route.replacement: "foo-bar-$1"
+#
+#        connectors:
+#          mysql-table-1:
+#            snapshot.mode: "no_data"
+#            database.server.id: "1002"
+#            schema.history.internal.kafka.topic: "database-schema-table-1"
+#            table.include.list: "your_database.table_name_1"
+#
+#          mysql-table-2
+#            snapshot.mode: "no_data"
+#            database.server.id: "1003"
+#            schema.history.internal.kafka.topic: "database-schema-table-2"
+#            table.include.list: "your_database.table_name_2"

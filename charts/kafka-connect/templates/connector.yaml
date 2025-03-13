@@ -1,8 +1,11 @@
 {{- $global := .Values.global }}
 {{- range $cluster, $config := .Values.clusters }}
+
 {{- $connect_name := (printf "%s-%s" (include "kafka-connect.name" $) $cluster) }}
-{{- range $connector, $connector_config := $config.connectors -}}
-{{- $topic := $connector_config.topic | default (printf "%s-%s" $connect_name $connector) -}}
+
+{{- /* General Connectors */}}
+{{- range $connector, $connector_config := $config.connectors }}
+{{- $topic := $connector_config.topic | default (printf "%s-%s" $connect_name $connector) }}
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnector
 metadata:
@@ -21,6 +24,52 @@ spec:
     confluent.topic.replication.factor: 3
     confluent.license: {{ $global.confluentLicense | quote }}
     {{- range $key, $value := $connector_config.config }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+---
+{{- end }}
+
+{{- /* Debezium Connectors */}}
+{{- $shared := $config.debeziumConnectors.sharedConfig }}
+{{- range $connector, $connector_config := $config.debeziumConnectors.connectors }}
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: {{ $connect_name }}-{{ $connector }}
+  labels:
+    strimzi.io/cluster: {{ $connect_name }}
+spec:
+  class: {{ $.Values.debezium_database.class }}
+  config:
+    tasks.max: "1"
+    bootstrap.servers: {{ $.Values.kafka.bootstrapServers }}
+    security.protocol: {{ $.Values.kafka.securityProtocol }}
+    sasl.mechanism: {{ $.Values.kafka.saslMechanism }}
+    sasl.jaas.config: {{ $.Values.kafka.saslJaasConfig }}
+    sasl.client.callback.handler.class: {{ $.Values.kafka.saslClientCallbackHandler }}
+    schema.history.internal.kafka.bootstrap.servers: {{ $.Values.kafka.bootstrapServers }}
+    database.hostname: {{ $.Values.debezium_database.hostname }}
+    database.user: {{ $.Values.debezium_database.user }}
+    database.password: {{ $.Values.debezium_database.password }}
+    database.port: {{ $.Values.debezium_database.port }}
+    database.dbname: {{ $.Values.debezium_database.db_name }}
+    schema.history.internal.producer.sasl.client.callback.handler.class: {{ $.Values.kafka.saslClientCallbackHandler }}
+    schema.history.internal.producer.security.protocol: {{ $.Values.kafka.securityProtocol }}
+    schema.history.internal.producer.sasl.mechanism: {{ $.Values.kafka.saslMechanism }}
+    schema.history.internal.producer.sasl.jaas.config: {{ $.Values.kafka.saslJaasConfig }}
+    schema.history.internal.consumer.sasl.client.callback.handler.class: {{ $.Values.kafka.saslClientCallbackHandler }}
+    schema.history.internal.consumer.sasl.mechanism: {{ $.Values.kafka.saslMechanism }}
+    schema.history.internal.consumer.sasl.jaas.config: {{ $.Values.kafka.saslJaasConfig }}
+    schema.history.internal.consumer.security.protocol: {{ $.Values.kafka.securityProtocol }}
+    schema.history.internal.store.only.captured.tables.ddl: "true"
+    schema.history.internal.store.only.captured.databases.ddl: "true"
+    schema.history.internal.skip.unparseable.ddl: "true"
+    key.converter: "org.apache.kafka.connect.json.JsonConverter"
+    value.converter: "org.apache.kafka.connect.json.JsonConverter"
+    {{- range $key, $value := $shared }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+    {{- range $key, $value := $connector_config }}
     {{ $key }}: {{ $value }}
     {{- end }}
 ---

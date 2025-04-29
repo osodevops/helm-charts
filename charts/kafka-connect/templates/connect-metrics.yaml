@@ -182,4 +182,36 @@ data:
       name: kafka_connect_coordinator_$1
       help: "Kafka Connect JMX metric assignment information"
       type: GAUGE
+
+    - pattern: "debezium.([^:]+)<type=connector-metrics, context=([^,]+), server=([^,]+), key=([^>]+)><>RowsScanned"
+      name: "debezium_metrics_RowsScanned"
+      labels:
+        plugin: "$1"
+        name: "$3"
+        context: "$2"
+        table: "$4"
+
+    - pattern: "debezium.([^:]+)<type=connector-metrics, server=([^,]+), task=([^,]+), context=([^,]+), database=([^>]+)>([^:]+)"
+      name: "debezium_metrics_$6"
+      labels:
+        plugin: "$1"
+        name: "$2"
+        task: "$3"
+        context: "$4"
+        database: "$5"
+
+    - pattern: "debezium.([^:]+)<type=connector-metrics, server=([^,]+), task=([^,]+), context=([^>]+)>([^:]+)"
+      name: "debezium_metrics_$5"
+      labels:
+        plugin: "$1"
+        name: "$2"
+        task: "$3"
+        context: "$4"
+        
+    - pattern: "debezium.([^:]+)<type=connector-metrics, context=([^,]+), server=([^>]+)>([^:]+)"
+      name: "debezium_metrics_$4"
+      labels:
+        plugin: "$1"
+        name: "$3"
+        context: "$2"
 {{- end }}

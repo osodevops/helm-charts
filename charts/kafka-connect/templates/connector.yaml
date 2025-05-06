@@ -14,6 +14,7 @@ metadata:
     strimzi.io/cluster: {{ $connect_name }}
 spec:
   class: {{ $connector_config.class }}
+  tasksMax: {{ $connector_config.tasksMax | default 1 }}
   config:
     kafka.topic: {{ $topic }}
     confluent.topic.sasl.mechanism: {{ $.Values.kafka.saslMechanism }}

@@ -115,8 +115,8 @@ clusters:
 #           # If not set, a topic name is generated using the fullname template
 #           topic: example-topic
 #           class: io.confluent.connect.servicenow.ServiceNowSourceConnector
+#           tasksMax: 1
 #           config:
-#             tasks.max: 1
 #             key.converter: org.apache.kafka.connect.json.JsonConverter
 #             value.converter: org.apache.kafka.connect.json.JsonConverter
 #             servicenow.url: https://customer.service-now.com/

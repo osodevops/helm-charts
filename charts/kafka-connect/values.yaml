@@ -37,6 +37,12 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+podAntiAffinity:
+  enabled: true  # Set to false to disable default pod anti-affinity
+
+nodeAffinity:
+  enabled: true
+
 monitoring:
   enabled: false
   podMonitor:
@@ -62,17 +68,11 @@ debezium_database:
   port: "3306"
   db_name: "your_database"
 
-nodeAffinity:
-  enabled: true
-  config:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/arch
-              operator: In
-              values:
-                - amd64
-# To override, set nodeAffinity.enabled: false or provide your own nodeAffinity.config
+podAnnotations: {}
+# Example:
+# podAnnotations:
+#   eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/dummy-role
+#   iam.amazonaws.com/role: dummy-role-for-gke
 
 # env:
 #  - name: AWS_ROLE_SESSION_NAME >> https://github.com/tulios/kafkajs/issues/1582

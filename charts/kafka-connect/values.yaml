@@ -62,6 +62,17 @@ debezium_database:
   port: "3306"
   db_name: "your_database"
 
+nodeAffinity:
+  enabled: true
+  config:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/arch
+              operator: In
+              values:
+                - amd64
+# To override, set nodeAffinity.enabled: false or provide your own nodeAffinity.config
 
 # env:
 #  - name: AWS_ROLE_SESSION_NAME >> https://github.com/tulios/kafkajs/issues/1582

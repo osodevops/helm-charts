@@ -66,6 +66,16 @@ spec:
                     operator: In
                     values:
                       - amd64
+{{- if $.Values.nodeAffinity.enabled }}
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+{{- end }}
 {{- if $.Values.monitoring.enabled }}                      
   metricsConfig:
     type: jmxPrometheusExporter

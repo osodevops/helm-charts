@@ -48,7 +48,13 @@ spec:
           value: "none"
 {{- end }}
     pod:
+      metadata:
+        annotations:
+{{- if $.Values.podAnnotations }}
+{{ toYaml $.Values.podAnnotations | indent 10 }}
+{{- end }}
       affinity:
+{{- if $.Values.podAntiAffinity.enabled }}
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
@@ -58,6 +64,8 @@ spec:
                     values:
                       - {{ $connect_name }}
               topologyKey: "kubernetes.io/hostname"
+{{- end }}
+{{- if $.Values.nodeAffinity.enabled }}
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
@@ -66,6 +74,7 @@ spec:
                     operator: In
                     values:
                       - amd64
+{{- end }}
 {{- if $.Values.monitoring.enabled }}                      
   metricsConfig:
     type: jmxPrometheusExporter
@@ -76,10 +85,12 @@ spec:
 {{ end }}
   config:
     group.id: {{ $config.groupId | default $connect_name }}
+{{- if $config.providersClass }}
     config.providers: {{ $config.providersClass | keys | join ", " }}
     {{- range $provider, $class := $config.providersClass }}
     config.providers.{{ $provider }}.class: {{ $class }}
     {{- end }}
+{{- end }}
 {{- include "kafka-connect.storageConfig"  (dict "global" $global "config" $config "clustername" $connect_name) | indent 4}}
 ---
 {{- end }}

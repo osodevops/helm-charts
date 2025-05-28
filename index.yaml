@@ -28,6 +28,18 @@ entries:
   kafka-connect:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2025-05-28T09:04:12.880149928Z"
+    description: A Helm chart for deploying Kafka Connect on Kubernetes
+    digest: 14cebb468cc55e1c5ba39c4963d5e85d7e0c2f5d7b622589509f7a291d36c21f
+    maintainers:
+    - name: devops-consultants
+    name: kafka-connect
+    type: application
+    urls:
+    - https://github.com/osodevops/helm-charts/releases/download/kafka-connect-0.4.0/kafka-connect-0.4.0.tgz
+    version: 0.4.0
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2025-05-27T14:28:03.096294136Z"
     description: A Helm chart for deploying Kafka Connect on Kubernetes
     digest: ba4cb51a72e796fa723d8819c3bacad7f1219e99c773fc23699025087cb8d6e2
@@ -230,4 +242,4 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/kafka-connect-0.1.1/kafka-connect-0.1.1.tgz
     version: 0.1.1
-generated: "2025-05-27T14:28:03.096427493Z"
+generated: "2025-05-28T09:04:12.880283576Z"

@@ -28,6 +28,12 @@ spec:
     type: opentelemetry  
 {{ end }}
   template:
+    serviceAccount:
+      metadata:
+        annotations:
+{{- if $.Values.serviceAccount.annotations }}
+{{ toYaml $.Values.serviceAccount.annotations | indent 10 }}
+{{- end }}
     connectContainer:
       env:
 {{- range $.Values.env }}

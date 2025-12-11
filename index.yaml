@@ -25,6 +25,33 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/eventcatalog-0.1.0/eventcatalog-0.1.0.tgz
     version: 0.1.0
+  kafka-backup-operator:
+  - annotations:
+      category: Infrastructure
+    apiVersion: v2
+    appVersion: 0.1.0
+    created: "2025-12-11T12:01:18.670947946Z"
+    description: A Kubernetes operator for managing Kafka backup and restore operations
+    digest: d5bf7926a216bfdba3b95c2cd916fd1d99b4c275f7b61f833d595f129d72f7e7
+    home: https://github.com/osodevops/kafka-backup-operator
+    icon: https://raw.githubusercontent.com/osodevops/kafka-backup-operator/main/docs/icon.png
+    keywords:
+    - kafka
+    - backup
+    - restore
+    - operator
+    - disaster-recovery
+    maintainers:
+    - email: dev@oso.sh
+      name: sionsmith
+      url: https://github.com/sionsmith
+    name: kafka-backup-operator
+    sources:
+    - https://github.com/osodevops/kafka-backup-operator
+    type: application
+    urls:
+    - https://github.com/osodevops/helm-charts/releases/download/kafka-backup-operator-0.1.1/kafka-backup-operator-0.1.1.tgz
+    version: 0.1.1
   kafka-connect:
   - apiVersion: v2
     appVersion: 1.16.0
@@ -254,4 +281,4 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/kafka-connect-0.1.1/kafka-connect-0.1.1.tgz
     version: 0.1.1
-generated: "2025-06-09T17:01:23.544719188Z"
+generated: "2025-12-11T12:01:18.671002488Z"

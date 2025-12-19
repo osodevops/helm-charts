@@ -49,11 +49,13 @@ spec:
     sasl.jaas.config: {{ $.Values.kafka.saslJaasConfig }}
     sasl.client.callback.handler.class: {{ $.Values.kafka.saslClientCallbackHandler }}
     schema.history.internal.kafka.bootstrap.servers: {{ $.Values.kafka.bootstrapServers }}
-    database.hostname: {{ $.Values.debezium_database.hostname }}
-    database.user: {{ $.Values.debezium_database.user }}
-    database.password: {{ $.Values.debezium_database.password }}
-    database.port: {{ $.Values.debezium_database.port }}
-    database.dbname: {{ $.Values.debezium_database.db_name }}
+
+    {{- $db := $connector_config.database | default dict }}
+    database.hostname: {{ $db.hostname | default $.Values.debezium_database.hostname }}
+    database.user: {{ $db.user | default $.Values.debezium_database.user }}
+    database.password: {{ $db.password | default $.Values.debezium_database.password }}
+    database.port: {{ $db.port | default $.Values.debezium_database.port }}
+    database.dbname: {{ $db.db_name | default $.Values.debezium_database.db_name }}
     schema.history.internal.producer.sasl.client.callback.handler.class: {{ $.Values.kafka.saslClientCallbackHandler }}
     schema.history.internal.producer.security.protocol: {{ $.Values.kafka.securityProtocol }}
     schema.history.internal.producer.sasl.mechanism: {{ $.Values.kafka.saslMechanism }}
@@ -71,7 +73,9 @@ spec:
     {{ $key }}: {{ $value }}
     {{- end }}
     {{- range $key, $value := $connector_config }}
+    {{- if ne $key "database" }}
     {{ $key }}: {{ $value }}
+    {{- end }}
     {{- end }}
 ---
 {{- end }}

@@ -29,6 +29,32 @@ entries:
   - annotations:
       category: Infrastructure
     apiVersion: v2
+    appVersion: 0.2.5
+    created: "2026-01-06T06:43:21.911963362Z"
+    description: A Kubernetes operator for managing Kafka backup and restore operations
+    digest: 31a300bee6cc1fc7bc14ee805174253efe433259aeb5a474060eded73d15d4bd
+    home: https://github.com/osodevops/kafka-backup-operator
+    icon: https://raw.githubusercontent.com/osodevops/kafka-backup-operator/main/docs/icon.png
+    keywords:
+    - kafka
+    - backup
+    - restore
+    - operator
+    - disaster-recovery
+    maintainers:
+    - email: dev@oso.sh
+      name: sionsmith
+      url: https://github.com/sionsmith
+    name: kafka-backup-operator
+    sources:
+    - https://github.com/osodevops/kafka-backup-operator
+    type: application
+    urls:
+    - https://github.com/osodevops/helm-charts/releases/download/kafka-backup-operator-0.2.5/kafka-backup-operator-0.2.5.tgz
+    version: 0.2.5
+  - annotations:
+      category: Infrastructure
+    apiVersion: v2
     appVersion: 0.2.1
     created: "2025-12-15T15:45:36.602349937Z"
     description: A Kubernetes operator for managing Kafka backup and restore operations
@@ -319,4 +345,4 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/kafka-connect-0.1.1/kafka-connect-0.1.1.tgz
     version: 0.1.1
-generated: "2025-12-19T09:41:55.826205682Z"
+generated: "2026-01-06T06:43:21.911998518Z"

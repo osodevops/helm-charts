@@ -36,6 +36,7 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
         run: |
           helm repo add valkey https://valkey-io.github.io/valkey-helm
+          helm repo add mongodb https://mongodb.github.io/helm-charts
           helm repo update
 
       - name: Build chart dependencies

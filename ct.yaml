@@ -14,6 +14,7 @@ chart-dirs:
 # Chart repositories for dependencies
 chart-repos:
   - valkey=https://valkey-io.github.io/valkey-helm
+  - mongodb=https://mongodb.github.io/helm-charts
 
 # Helm extra arguments
 helm-extra-args: --timeout 600s

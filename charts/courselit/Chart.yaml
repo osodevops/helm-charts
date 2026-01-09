@@ -24,3 +24,10 @@ dependencies:
     condition: queue.enabled,valkey.enabled
     tags:
       - queue
+  - name: community-operator
+    version: "0.10.0"
+    repository: "https://mongodb.github.io/helm-charts"
+    condition: mongodb.operator.enabled
+    tags:
+      - mongodb
+      - operator

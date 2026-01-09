@@ -94,6 +94,13 @@ mongodb:
   # Set to false to use external MongoDB (e.g., Atlas, DocumentDB)
   enabled: true
 
+  # MongoDB Community Operator deployment
+  operator:
+    # Deploy operator as subchart dependency (default: false)
+    # Set to true for CI/CD testing or first-time installations
+    # In production, operator is typically installed cluster-wide
+    enabled: false
+
   # External MongoDB connection (used when enabled=false)
   external:
     connectionString: ""  # Full connection string for external MongoDB

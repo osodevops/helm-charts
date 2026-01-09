@@ -99,7 +99,7 @@ mongodb:
     # Deploy operator as subchart dependency (default: false)
     # Set to true for CI/CD testing or first-time installations
     # In production, operator is typically installed cluster-wide
-    enabled: false
+    enabled: true
 
   # External MongoDB connection (used when enabled=false)
   external:

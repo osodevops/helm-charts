@@ -1,0 +1,108 @@
+{{- if .Values.medialit.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "courselit.fullname" . }}-medialit
+  labels:
+    {{- include "courselit.medialit.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.medialit.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "courselit.medialit.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "courselit.medialit.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "courselit.medialit.serviceAccountName" . }}
+      initContainers:
+        {{- include "courselit.mongodb.initContainer" . | nindent 8 }}
+      containers:
+        - name: medialit
+          image: {{ include "courselit.medialit.image" . }}
+          imagePullPolicy: {{ .Values.medialit.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: EMAIL
+              value: {{ .Values.app.config.superAdminEmail | quote }}
+            {{- if .Values.mongodb.enabled }}
+            - name: DB_CONNECTION_STRING
+              value: {{ include "courselit.mongodb.medialitConnectionString" . | quote }}
+            {{- else }}
+            - name: DB_CONNECTION_STRING
+              value: {{ .Values.mongodb.external.connectionString | replace "/courselit" "/medialit" | quote }}
+            {{- end }}
+            - name: CLOUD_BUCKET_NAME
+              value: {{ .Values.medialit.config.s3.bucketName | quote }}
+            - name: CLOUD_REGION
+              value: {{ .Values.medialit.config.s3.region | quote }}
+            {{- if .Values.medialit.config.s3.endpoint }}
+            - name: CLOUD_ENDPOINT
+              value: {{ .Values.medialit.config.s3.endpoint | quote }}
+            - name: S3_ENDPOINT
+              value: {{ .Values.medialit.config.s3.endpoint | quote }}
+            {{- end }}
+            {{- if .Values.medialit.config.s3.prefix }}
+            - name: CLOUD_PREFIX
+              value: {{ .Values.medialit.config.s3.prefix | quote }}
+            {{- end }}
+            - name: TEMP_FILE_DIR_FOR_UPLOADS
+              value: "/tmp"
+            {{- if .Values.medialit.config.enableTrustProxy }}
+            - name: ENABLE_TRUST_PROXY
+              value: "true"
+            {{- end }}
+            {{- if .Values.medialit.config.cloudfront.enabled }}
+            - name: USE_CLOUDFRONT
+              value: "true"
+            - name: CLOUDFRONT_ENDPOINT
+              value: {{ .Values.medialit.config.cloudfront.endpoint | quote }}
+            - name: CLOUDFRONT_KEY_PAIR_ID
+              value: {{ .Values.medialit.config.cloudfront.keyPairId | quote }}
+            - name: CDN_MAX_AGE
+              value: {{ .Values.medialit.config.cloudfront.maxAge | quote }}
+            - name: CLOUDFRONT_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courselit.fullname" . }}-medialit-secrets
+                  key: cloudfront-private-key
+            {{- end }}
+            {{- if and .Values.medialit.externalSecrets.enabled .Values.medialit.externalSecrets.s3Credentials.enabled }}
+            - name: CLOUD_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courselit.fullname" . }}-medialit-secrets
+                  key: aws-access-key-id
+            - name: CLOUD_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courselit.fullname" . }}-medialit-secrets
+                  key: aws-secret-access-key
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.medialit.resources | nindent 12 }}
+{{- end }}

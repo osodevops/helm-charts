@@ -1,5 +1,52 @@
 apiVersion: v1
 entries:
+  courselit:
+  - apiVersion: v2
+    appVersion: latest
+    created: "2026-02-13T06:56:10.883816816Z"
+    dependencies:
+    - condition: queue.enabled,valkey.enabled
+      name: valkey
+      repository: https://valkey-io.github.io/valkey-helm
+      tags:
+      - queue
+      version: 0.9.2
+    - condition: mongodb.operator.enabled
+      name: community-operator
+      repository: https://mongodb.github.io/helm-charts
+      tags:
+      - mongodb
+      - operator
+      version: 0.13.0
+    - alias: mongodb-rbac
+      condition: mongodb.enabled
+      name: community-operator
+      repository: https://mongodb.github.io/helm-charts
+      tags:
+      - mongodb
+      - rbac
+      version: 0.13.0
+    description: A Helm chart for deploying CourseLIT Learning Management System on
+      Kubernetes
+    digest: 9054833573e5f35744f2d203517a8dffece162bafdf06d9cfe947741945dd256
+    home: https://courselit.app
+    keywords:
+    - courselit
+    - lms
+    - education
+    - learning
+    maintainers:
+    - email: hello@courselit.app
+      name: CourseLIT Team
+    - email: rob.coward@devops-consultants.co.uk
+      name: DevOps Consultants
+    name: courselit
+    sources:
+    - https://github.com/codelitdev/courselit
+    type: application
+    urls:
+    - https://github.com/osodevops/helm-charts/releases/download/courselit-0.1.8/courselit-0.1.8.tgz
+    version: 0.1.8
   eventcatalog:
   - apiVersion: v2
     appVersion: 1.0.1
@@ -371,4 +418,4 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/kafka-connect-0.1.1/kafka-connect-0.1.1.tgz
     version: 0.1.1
-generated: "2026-01-20T06:16:11.157443545Z"
+generated: "2026-02-13T06:56:10.883900162Z"

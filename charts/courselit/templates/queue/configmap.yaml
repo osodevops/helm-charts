@@ -1,0 +1,11 @@
+{{- if .Values.queue.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "courselit.fullname" . }}-queue
+  labels:
+    {{- include "courselit.queue.labels" . | nindent 4 }}
+data:
+  DOMAIN: {{ .Values.queue.config.domain | quote }}
+  PROTOCOL: {{ .Values.queue.config.protocol | quote }}
+{{- end }}

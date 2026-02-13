@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "courselit.fullname" . }}-app
+  labels:
+    {{- include "courselit.app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.app.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "courselit.app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "courselit.app.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: app
+          image: {{ include "courselit.app.image" . }}
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.app.port }}
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: {{ .Values.app.config.nodeEnv | quote }}
+            - name: PORT
+              value: {{ .Values.app.port | quote }}
+            - name: SUPER_ADMIN_EMAIL
+              value: {{ .Values.app.config.superAdminEmail | quote }}
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.secrets.authSecretRef.name }}
+                  key: {{ .Values.app.secrets.authSecretRef.key }}
+            - name: EMAIL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.secrets.emailSecretRef.name }}
+                  key: {{ .Values.app.secrets.emailSecretRef.userKey }}
+            - name: EMAIL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.secrets.emailSecretRef.name }}
+                  key: {{ .Values.app.secrets.emailSecretRef.passKey }}
+            - name: EMAIL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.secrets.emailSecretRef.name }}
+                  key: {{ .Values.app.secrets.emailSecretRef.hostKey }}
+            - name: EMAIL_FROM
+              value: {{ .Values.app.smtp.from | quote }}
+            - name: EMAIL_PORT
+              value: "{{ .Values.app.smtp.port }}"
+            {{- if .Values.app.secrets.recaptchaSecretRef.name }}
+            - name: RECAPTCHA_SITE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.secrets.recaptchaSecretRef.name }}
+                  key: {{ .Values.app.secrets.recaptchaSecretRef.siteKeyKey }}
+            - name: RECAPTCHA_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.secrets.recaptchaSecretRef.name }}
+                  key: {{ .Values.app.secrets.recaptchaSecretRef.secretKeyKey }}
+            {{- end }}
+            {{- if .Values.mongodb.enabled }}
+            {{- if .Values.mongodb.useOperator }}
+            - name: DB_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courselit.fullname" . }}-mongodb-admin-{{ .Values.mongodb.auth.rootUsername }}
+                  key: connectionString.standard
+            {{- else }}
+            - name: DB_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courselit.fullname" . }}-mongodb-connection
+                  key: connectionString
+            {{- end }}
+            {{- else }}
+            - name: DB_CONNECTION_STRING
+              value: {{ .Values.mongodb.external.connectionString | quote }}
+            {{- end }}
+            {{- if .Values.queue.enabled }}
+            - name: QUEUE_SERVER
+              value: "http://{{ include "courselit.fullname" . }}-queue"
+            {{- end }}
+            {{- if .Values.medialit.enabled }}
+            - name: MEDIALIT_SERVER
+              value: "http://{{ include "courselit.fullname" . }}-medialit"
+            - name: MEDIALIT_APIKEY
+              value: "medialit-api-key"
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}
+      {{- with .Values.app.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,12 @@
+dependencies:
+- name: valkey
+  repository: https://valkey-io.github.io/valkey-helm
+  version: 0.9.2
+- name: community-operator
+  repository: https://mongodb.github.io/helm-charts
+  version: 0.13.0
+- name: community-operator
+  repository: https://mongodb.github.io/helm-charts
+  version: 0.13.0
+digest: sha256:be12c754e12d6fc898c469c7ba7136575bf973a80ac0e6ec2bfa5dbfe779692c
+generated: "2026-02-13T06:53:13.770954Z"

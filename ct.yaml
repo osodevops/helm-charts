@@ -1,0 +1,20 @@
+# Configuration for chart-testing
+# See: https://github.com/helm/chart-testing/blob/main/doc/ct_lint.md
+
+# Validate maintainers (set to false to skip validation)
+validate-maintainers: false
+
+# Target branch for detecting chart changes
+target-branch: main
+
+# Chart directories
+chart-dirs:
+  - charts
+
+# Chart repositories for dependencies
+chart-repos:
+  - valkey=https://valkey-io.github.io/valkey-helm
+  - mongodb=https://mongodb.github.io/helm-charts
+
+# Helm extra arguments
+helm-extra-args: --timeout 600s

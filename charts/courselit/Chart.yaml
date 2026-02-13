@@ -1,0 +1,41 @@
+apiVersion: v2
+name: courselit
+description: A Helm chart for deploying CourseLIT Learning Management System on Kubernetes
+type: application
+version: 0.1.8
+appVersion: "latest"
+keywords:
+  - courselit
+  - lms
+  - education
+  - learning
+home: https://courselit.app
+sources:
+  - https://github.com/codelitdev/courselit
+maintainers:
+  - name: CourseLIT Team
+    email: hello@courselit.app
+  - name: DevOps Consultants
+    email: rob.coward@devops-consultants.co.uk
+dependencies:
+  - name: valkey
+    version: "0.9.2"
+    repository: "https://valkey-io.github.io/valkey-helm"
+    condition: queue.enabled,valkey.enabled
+    tags:
+      - queue
+  - name: community-operator
+    version: "0.13.0"
+    repository: "https://mongodb.github.io/helm-charts"
+    condition: mongodb.operator.enabled
+    tags:
+      - mongodb
+      - operator
+  - name: community-operator
+    alias: mongodb-rbac
+    version: "0.13.0"
+    repository: "https://mongodb.github.io/helm-charts"
+    condition: mongodb.enabled
+    tags:
+      - mongodb
+      - rbac

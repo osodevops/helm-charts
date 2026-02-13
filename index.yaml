@@ -418,4 +418,33 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/kafka-connect-0.1.1/kafka-connect-0.1.1.tgz
     version: 0.1.1
-generated: "2026-02-13T06:56:10.883900162Z"
+  strimzi-backup-operator:
+  - annotations:
+      category: Infrastructure
+    apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-02-13T17:29:36.641023024Z"
+    description: A Strimzi-native Kubernetes operator for Kafka backup and restore
+    digest: 2fc2c1ec12062355ab89fd4726ea4cad4f3843c94bf7d07b7a51c6487a35fd74
+    home: https://github.com/osodevops/strimzi-backup-operator
+    icon: https://strimzi.io/assets/images/strimzi_logo.png
+    keywords:
+    - strimzi
+    - kafka
+    - backup
+    - restore
+    - kubernetes
+    - operator
+    - disaster-recovery
+    maintainers:
+    - email: dev@oso.sh
+      name: sionsmith
+      url: https://osodevops.io
+    name: strimzi-backup-operator
+    sources:
+    - https://github.com/osodevops/strimzi-backup-operator
+    type: application
+    urls:
+    - https://github.com/osodevops/helm-charts/releases/download/strimzi-backup-operator-0.1.0/strimzi-backup-operator-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-02-13T17:29:36.641087956Z"

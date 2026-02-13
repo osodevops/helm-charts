@@ -1,4 +1,4 @@
-{{- if .Values.mongodb.enabled }}
+{{- if and .Values.mongodb.enabled .Values.mongodb.useOperator }}
 apiVersion: mongodbcommunity.mongodb.com/v1
 kind: MongoDBCommunity
 metadata:

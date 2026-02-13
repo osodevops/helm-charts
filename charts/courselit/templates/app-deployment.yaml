@@ -18,8 +18,6 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      initContainers:
-        {{- include "courselit.mongodb.initContainer" . | nindent 8 }}
       containers:
         - name: app
           image: {{ include "courselit.app.image" . }}
@@ -60,10 +58,9 @@ spec:
                   name: {{ .Values.app.secrets.emailSecretRef.name }}
                   key: {{ .Values.app.secrets.emailSecretRef.hostKey }}
             - name: EMAIL_FROM
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.app.secrets.emailSecretRef.name }}
-                  key: {{ .Values.app.secrets.emailSecretRef.fromKey }}
+              value: {{ .Values.app.smtp.from | quote }}
+            - name: EMAIL_PORT
+              value: "{{ .Values.app.smtp.port }}"
             {{- if .Values.app.secrets.recaptchaSecretRef.name }}
             - name: RECAPTCHA_SITE_KEY
               valueFrom:
@@ -77,11 +74,19 @@ spec:
                   key: {{ .Values.app.secrets.recaptchaSecretRef.secretKeyKey }}
             {{- end }}
             {{- if .Values.mongodb.enabled }}
+            {{- if .Values.mongodb.useOperator }}
+            - name: DB_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courselit.fullname" . }}-mongodb-admin-{{ .Values.mongodb.auth.rootUsername }}
+                  key: connectionString.standard
+            {{- else }}
             - name: DB_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
                   name: {{ include "courselit.fullname" . }}-mongodb-connection
                   key: connectionString
+            {{- end }}
             {{- else }}
             - name: DB_CONNECTION_STRING
               value: {{ .Values.mongodb.external.connectionString | quote }}
@@ -114,3 +119,7 @@ spec:
             failureThreshold: 3
           resources:
             {{- toYaml .Values.app.resources | nindent 12 }}
+      {{- with .Values.app.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -2,7 +2,7 @@ apiVersion: v2
 name: courselit
 description: A Helm chart for deploying CourseLIT Learning Management System on Kubernetes
 type: application
-version: 0.1.0
+version: 0.1.8
 appVersion: "latest"
 keywords:
   - courselit
@@ -25,9 +25,17 @@ dependencies:
     tags:
       - queue
   - name: community-operator
-    version: "0.10.0"
+    version: "0.13.0"
     repository: "https://mongodb.github.io/helm-charts"
     condition: mongodb.operator.enabled
     tags:
       - mongodb
       - operator
+  - name: community-operator
+    alias: mongodb-rbac
+    version: "0.13.0"
+    repository: "https://mongodb.github.io/helm-charts"
+    condition: mongodb.enabled
+    tags:
+      - mongodb
+      - rbac

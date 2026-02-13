@@ -181,20 +181,27 @@ MongoDB wait initContainer
       echo "Waiting for MongoDB to be ready..."
       {{- if .Values.mongodb.enabled }}
       {{- $fullname := include "courselit.fullname" . }}
-      MONGO_HOST="{{ printf "%s-mongodb-svc.%s.svc.cluster.local" $fullname .Release.Namespace }}"
+      # For StatefulSet with headless service, use pod-0 directly
+      MONGO_POD="{{ printf "%s-mongodb-0.%s-mongodb-svc" $fullname $fullname }}"
       {{- else }}
       {{- $parts := regexSplit "mongodb://([^@]+@)?([^/]+)" .Values.mongodb.external.connectionString -1 }}
       {{- if gt (len $parts) 2 }}
-      MONGO_HOST="{{ index $parts 2 | regexFind "[^:/]+" }}"
+      MONGO_POD="{{ index $parts 2 | regexFind "[^:/]+" }}"
       {{- else }}
-      MONGO_HOST="localhost"
+      MONGO_POD="localhost"
       {{- end }}
       {{- end }}
-      until nc -z -w2 $MONGO_HOST 27017; do
-        echo "MongoDB not ready yet. Retrying in 2 seconds..."
+      # Simple retry loop - wait up to 2 minutes for MongoDB
+      for i in $(seq 1 60); do
+        if nc -z -w2 "$MONGO_POD" 27017 2>/dev/null; then
+          echo "MongoDB is ready!"
+          exit 0
+        fi
+        echo "Attempt $i/60: MongoDB not ready yet, retrying in 2s..."
         sleep 2
       done
-      echo "MongoDB is ready!"
+      echo "ERROR: MongoDB did not become ready after 2 minutes"
+      exit 1
 {{- end }}
 
 {{/*

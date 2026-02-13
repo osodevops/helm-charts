@@ -9,8 +9,8 @@ app:
     tag: latest
     pullPolicy: IfNotPresent
 
-  # Application port
-  port: 80
+  # Application port (use 8080 for non-root, 80 requires root)
+  port: 8080
 
   config:
     nodeEnv: production
@@ -35,7 +35,6 @@ app:
       userKey: "email-user"
       passKey: "email-pass"
       hostKey: "email-host"
-      fromKey: "email-from"
 
     recaptchaSecretRef:
       name: ""  # Optional - reCAPTCHA configuration
@@ -49,6 +48,10 @@ app:
     limits:
       memory: "512Mi"
       cpu: "500m"
+
+  # Node selector - image only available for amd64 architecture
+  nodeSelector:
+    kubernetes.io/arch: amd64
 
   # Kubernetes service configuration
   service:
@@ -94,20 +97,35 @@ mongodb:
   # Set to false to use external MongoDB (e.g., Atlas, DocumentDB)
   enabled: true
 
-  # MongoDB Community Operator deployment
+  # MongoDB deployment mode:
+  # - useOperator: false (default) - Deploy simple MongoDB StatefulSet (like docker-compose)
+  #   Best for: Development, testing, small deployments
+  # - useOperator: true - Use MongoDB Community Operator for production-grade deployment
+  #   Best for: Production, high-availability, replica sets
+  #   Requires: MongoDB Community Operator installed in cluster
+  useOperator: false
+
+  # MongoDB Community Operator deployment (when useOperator=true)
   operator:
     # Deploy operator as subchart dependency (default: false)
-    # Set to true for CI/CD testing or first-time installations
-    # In production, operator is typically installed cluster-wide
-    enabled: true
+    # NOTE: This can cause CRD timing issues. It's recommended to install
+    # the operator separately: helm install mongodb-operator mongodb/community-operator
+    enabled: false
 
   # External MongoDB connection (used when enabled=false)
   external:
     connectionString: ""  # Full connection string for external MongoDB
 
-  # In-cluster MongoDB (used when enabled=true)
+  # Simple MongoDB deployment (used when enabled=true and useOperator=false)
+  simple:
+    image:
+      repository: mongo
+      tag: "8.2"
+      pullPolicy: IfNotPresent
+
+  # Operator-based MongoDB (used when enabled=true and useOperator=true)
   # Requires MongoDB Community Operator
-  version: "7.0.0"
+  version: "8.2"
   type: ReplicaSet  # or "Standalone"
   members: 3
 
@@ -118,6 +136,8 @@ mongodb:
     secretKey: "password"
 
   storage:
+    # Use emptyDir instead of PVC (useful for CI/testing, data is not persisted)
+    useEmptyDir: false
     storageClass: ""  # Use cluster default if not specified
     size: 10Gi
 
@@ -128,6 +148,13 @@ mongodb:
     limits:
       memory: "1Gi"
       cpu: "1000m"
+
+mongodb-rbac:
+  operator:
+    enabled: false
+  databaseRoles:
+    create: true
+    namespace: "courselit"
 
 # Queue service (optional)
 queue:
@@ -237,7 +264,7 @@ medialit:
   serviceAccount:
     create: true
     annotations: {}
-      # eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/ROLE_NAME
+    # eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/ROLE_NAME
     name: ""
 
   resources:
@@ -271,3 +298,25 @@ securityContext:
     drop:
       - ALL
   readOnlyRootFilesystem: false
+
+# Extra Kubernetes manifests to deploy
+# This allows you to deploy additional resources like ExternalSecrets, ConfigMaps, etc.
+# Example:
+# extraManifests:
+#   - apiVersion: external-secrets.io/v1beta1
+#     kind: ExternalSecret
+#     metadata:
+#       name: "{{ include \"courselit.fullname\" . }}-aws-secret"
+#     spec:
+#       refreshInterval: 1h
+#       secretStoreRef:
+#         name: aws-secretsmanager
+#         kind: ClusterSecretStore
+#       target:
+#         name: courselit-auth
+#         creationPolicy: Owner
+#       data:
+#         - secretKey: auth-secret
+#           remoteRef:
+#             key: courselit/auth-secret
+extraManifests: []

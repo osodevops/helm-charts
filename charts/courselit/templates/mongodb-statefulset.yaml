@@ -1,0 +1,83 @@
+{{- if and .Values.mongodb.enabled (not .Values.mongodb.useOperator) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "courselit.fullname" . }}-mongodb-svc
+  labels:
+    {{- include "courselit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+      name: mongodb
+  clusterIP: None
+  selector:
+    {{- include "courselit.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "courselit.fullname" . }}-mongodb
+  labels:
+    {{- include "courselit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+spec:
+  serviceName: {{ include "courselit.fullname" . }}-mongodb-svc
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "courselit.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: mongodb
+  template:
+    metadata:
+      labels:
+        {{- include "courselit.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: mongodb
+    spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: mongodb
+          image: "{{ .Values.mongodb.simple.image.repository }}:{{ .Values.mongodb.simple.image.tag }}"
+          imagePullPolicy: {{ .Values.mongodb.simple.image.pullPolicy }}
+          ports:
+            - containerPort: 27017
+              name: mongodb
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: {{ .Values.mongodb.auth.rootUsername | quote }}
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mongodb.auth.existingSecret }}
+                  key: {{ .Values.mongodb.auth.secretKey }}
+          {{- with .Values.mongodb.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+      {{- if .Values.mongodb.storage.useEmptyDir }}
+      volumes:
+        - name: data
+          emptyDir: {}
+      {{- end }}
+  {{- if not .Values.mongodb.storage.useEmptyDir }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        {{- if .Values.mongodb.storage.storageClass }}
+        storageClassName: {{ .Values.mongodb.storage.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.mongodb.storage.size }}
+  {{- end }}
+{{- end }}

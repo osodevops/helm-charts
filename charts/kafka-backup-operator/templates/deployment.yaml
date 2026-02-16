@@ -4,7 +4,6 @@ metadata:
   name: {{ include "kafka-backup-operator.fullname" . }}
   labels:
     {{- include "kafka-backup-operator.labels" . | nindent 4 }}
-    app.kubernetes.io/component: controller
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -22,6 +21,9 @@ spec:
         {{- if .Values.azureWorkloadIdentity.enabled }}
         azure.workload.identity/use: "true"
         {{- end }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -34,9 +36,13 @@ spec:
         - name: operator
           image: {{ include "kafka-backup-operator.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.commandOverride }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - name: metrics
-              containerPort: 8080
+              containerPort: 9090
               protocol: TCP
           env:
             - name: RUST_LOG
@@ -45,6 +51,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            {{- if .Values.watchNamespaces }}
+            - name: STRIMZI_BACKUP_NAMESPACE
+              value: {{ join "," .Values.watchNamespaces | quote }}
+            {{- end }}
             {{- if .Values.leaderElection.enabled }}
             - name: LEADER_ELECTION_ENABLED
               value: "true"
@@ -57,6 +67,7 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- if not .Values.commandOverride }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -73,14 +84,9 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
+          {{- end }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          volumeMounts:
-            - name: tmp
-              mountPath: /tmp
-      volumes:
-        - name: tmp
-          emptyDir: {}
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
       terminationGracePeriodSeconds: 30
       {{- with .Values.nodeSelector }}
       nodeSelector:

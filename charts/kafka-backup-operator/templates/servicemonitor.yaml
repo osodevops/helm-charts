@@ -3,6 +3,9 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "kafka-backup-operator.fullname" . }}
+  {{- if .Values.metrics.serviceMonitor.namespace }}
+  namespace: {{ .Values.metrics.serviceMonitor.namespace }}
+  {{- end }}
   labels:
     {{- include "kafka-backup-operator.labels" . | nindent 4 }}
     {{- with .Values.metrics.serviceMonitor.labels }}

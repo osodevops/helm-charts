@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "paperclip.fullname" . }}-test-health"
+  labels:
+    {{- include "paperclip.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+spec:
+  restartPolicy: Never
+  containers:
+    - name: test
+      image: curlimages/curl:latest
+      command:
+        - sh
+        - -c
+        - |
+          set -e
+          STATUS=$(curl -sf http://{{ include "paperclip.fullname" . }}:{{ .Values.service.port }}/api/health | jq -r '.status')
+          if [ "$STATUS" != "ok" ]; then
+            echo "Health check failed: $STATUS"
+            exit 1
+          fi
+          echo "Health check passed"

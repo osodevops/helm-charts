@@ -418,6 +418,37 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/kafka-connect-0.1.1/kafka-connect-0.1.1.tgz
     version: 0.1.1
+  paperclip:
+  - annotations:
+      category: AI
+    apiVersion: v2
+    appVersion: 0.3.1
+    created: "2026-04-02T11:53:26.798227263Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: ~18.x
+    description: A Helm chart for Paperclip — AI agent orchestration platform
+    digest: 13b49199406c7a94baf428b1f271c0d19c25db45eed10f62aeb3917e0a9b41dc
+    home: https://github.com/paperclipai/paperclip
+    icon: https://raw.githubusercontent.com/paperclipai/paperclip/main/ui/public/logo.svg
+    keywords:
+    - paperclip
+    - ai
+    - agents
+    - orchestration
+    maintainers:
+    - email: dev@oso.sh
+      name: sionsmith
+      url: https://github.com/sionsmith
+    name: paperclip
+    sources:
+    - https://github.com/paperclipai/paperclip
+    type: application
+    urls:
+    - https://github.com/osodevops/helm-charts/releases/download/paperclip-0.1.0/paperclip-0.1.0.tgz
+    version: 0.1.0
   strimzi-backup-operator:
   - annotations:
       category: Infrastructure
@@ -447,4 +478,4 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/strimzi-backup-operator-0.1.0/strimzi-backup-operator-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-13T17:29:36.641087956Z"
+generated: "2026-04-02T11:53:26.798297585Z"

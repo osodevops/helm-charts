@@ -1,0 +1,55 @@
+{{- if .Values.backup.external.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "paperclip.fullname" . }}-db-backup
+  labels:
+    {{- include "paperclip.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backup
+spec:
+  schedule: {{ .Values.backup.external.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 3600
+      template:
+        metadata:
+          labels:
+            {{- include "paperclip.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: backup
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          serviceAccountName: {{ include "paperclip.serviceAccountName" . }}
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: "{{ .Values.backup.external.image.repository }}:{{ .Values.backup.external.image.tag }}"
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+                  FILENAME="paperclip-${TIMESTAMP}.sql.gz"
+                  echo "Starting database backup: ${FILENAME}"
+                  pg_dump "$DATABASE_URL" | gzip > "/tmp/${FILENAME}"
+                  echo "Backup completed: ${FILENAME} ($(du -h /tmp/${FILENAME} | cut -f1))"
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "paperclip.dbSecretName" . }}
+                      key: database-url
+              resources:
+                {{- toYaml .Values.backup.external.resources | nindent 16 }}
+              securityContext:
+                {{- toYaml .Values.containerSecurityContext | nindent 16 }}
+{{- end }}

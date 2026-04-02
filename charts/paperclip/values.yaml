@@ -1,0 +1,295 @@
+# Default values for paperclip
+
+# -- Number of replicas. Keep at 1 unless you implement heartbeat scheduler leader election.
+replicaCount: 1
+
+image:
+  repository: ghcr.io/paperclipai/paperclip
+  # -- Overrides the image tag whose default is the chart appVersion
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# -- Paperclip Server Configuration
+server:
+  # -- Deployment mode: "local_trusted" or "authenticated"
+  deploymentMode: "authenticated"
+  # -- Deployment exposure: "private" or "public"
+  deploymentExposure: "private"
+  # -- Public URL for auth callbacks (required for "public" exposure)
+  publicUrl: ""
+  # -- Comma-separated additional allowed hostnames
+  allowedHostnames: ""
+  # -- Auth base URL mode: "auto" or "explicit"
+  authBaseUrlMode: "explicit"
+  # -- Disable new user registration
+  authDisableSignUp: false
+  # -- Serve the React UI from the server
+  serveUi: true
+  # -- Instance identifier
+  instanceId: "default"
+  # -- Allow company deletion (keep false in production)
+  companyDeletionEnabled: false
+  # -- Enable heartbeat scheduler (only one replica should run this)
+  heartbeatSchedulerEnabled: true
+  # -- Heartbeat check interval in milliseconds
+  heartbeatSchedulerIntervalMs: 30000
+
+# -- Service configuration
+service:
+  type: ClusterIP
+  port: 80
+  containerPort: 3100
+  annotations: {}
+
+# -- Ingress configuration
+# WebSocket support is required. Ensure your ingress controller passes
+# Upgrade/Connection headers and has sufficient proxy timeouts (>=3600s).
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    # nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    # nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    # nginx.ingress.kubernetes.io/configuration-snippet: |
+    #   proxy_set_header Upgrade $http_upgrade;
+    #   proxy_set_header Connection "upgrade";
+  hosts:
+    - host: paperclip.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+    # - secretName: paperclip-tls
+    #   hosts:
+    #     - paperclip.example.com
+
+# -- PostgreSQL configuration
+postgresql:
+  # -- Enable bundled PostgreSQL subchart (for dev/staging)
+  enabled: false
+  auth:
+    username: paperclip
+    database: paperclip
+    existingSecret: ""
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+      storageClass: ""
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+  metrics:
+    enabled: true
+  # -- External PostgreSQL (used when postgresql.enabled=false)
+  external:
+    host: ""
+    port: 5432
+    database: "paperclip"
+    username: "paperclip"
+    # -- Name of existing Secret containing key "password"
+    existingSecret: ""
+    sslMode: "require"
+    # -- Set true if using PgBouncer/Supavisor (appends ?prepare=false to DATABASE_URL)
+    connectionPooling: false
+
+# -- Object Storage
+storage:
+  # -- Storage provider: "s3" or "local_disk"
+  provider: "s3"
+  s3:
+    bucket: ""
+    region: "eu-west-2"
+    endpoint: ""
+    prefix: ""
+    forcePathStyle: false
+  localDisk:
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ""
+
+# -- Secrets
+secrets:
+  # -- Secrets encryption backend: "local_encrypted", "aws_secrets_manager", "gcp_secret_manager", "vault"
+  provider: "local_encrypted"
+  # -- Block new inline secrets
+  strictMode: true
+  # -- Better Auth session signing secret (auto-generated if empty)
+  betterAuthSecret: ""
+  # -- Name of existing Secret (key: better-auth-secret)
+  existingBetterAuthSecret: ""
+  # -- Encryption master key, base64 encoded, 32 bytes (auto-generated if empty)
+  # WARNING: If the Secret is deleted, all encrypted secrets are irrecoverable. Back this up.
+  masterKey: ""
+  # -- Name of existing Secret (key: master-key)
+  existingMasterKeySecret: ""
+  # -- Anthropic API key (optional)
+  anthropicApiKey: ""
+  # -- OpenAI API key (optional)
+  openaiApiKey: ""
+  # -- Name of existing Secret with ANTHROPIC_API_KEY and OPENAI_API_KEY keys
+  existingApiKeysSecret: ""
+
+# -- Persistence for /paperclip data volume
+# Database backups are stored under this volume by default.
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  existingClaim: ""
+  annotations: {}
+
+# -- Database Backups
+backup:
+  # Built-in backup system (runs inside the server process, writes to /paperclip PVC)
+  builtin:
+    enabled: true
+    intervalMinutes: 60
+    retentionDays: 30
+    directory: /paperclip/instances/default/data/backups
+  # External pg_dump CronJob (recommended for production, writes to S3)
+  external:
+    enabled: false
+    schedule: "0 */6 * * *"
+    s3Bucket: ""
+    s3Region: "eu-west-2"
+    retention:
+      days: 90
+    image:
+      repository: postgres
+      tag: "17-alpine"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+# -- External Secrets Operator integration
+externalSecrets:
+  enabled: false
+  refreshInterval: "1h"
+  secretStoreRef:
+    name: ""
+    kind: ClusterSecretStore
+  remoteRefs:
+    betterAuthSecret: ""
+    masterKey: ""
+    databasePassword: ""
+    anthropicApiKey: ""
+    openaiApiKey: ""
+
+# -- Pod resource limits
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+# -- Autoscaling (use with caution — see leader election notes above)
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+# -- Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# -- Network Policy
+networkPolicy:
+  enabled: true
+
+# -- Metrics (placeholder — Paperclip does not expose a Prometheus endpoint yet)
+metrics:
+  enabled: false
+  port: 9090
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    labels: {}
+
+# -- Pod scheduling
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []
+
+# -- ServiceAccount
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+    # eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT:role/paperclip-s3
+    # iam.gke.io/gcp-service-account: paperclip@PROJECT.iam.gserviceaccount.com
+  automountServiceAccountToken: false
+
+# -- Additional environment variables
+extraEnv: []
+  # - name: PAPERCLIP_SECRETS_MASTER_KEY_FILE
+  #   value: /paperclip/instances/default/secrets/master.key
+
+# -- Additional environment variable sources
+extraEnvFrom: []
+  # - secretRef:
+  #     name: my-extra-secrets
+
+# -- Additional volumes
+extraVolumes: []
+
+# -- Additional volume mounts
+extraVolumeMounts: []
+
+# -- Pod annotations
+podAnnotations: {}
+
+# -- Pod labels
+podLabels: {}
+
+# -- Deployment strategy
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
+
+# -- Init containers (e.g. wait-for-db)
+initContainers: []
+
+# -- Sidecars
+sidecars: []
+
+# -- Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container security context
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop: ["ALL"]

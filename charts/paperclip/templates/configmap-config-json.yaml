@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "paperclip.fullname" . }}-config-json
+  labels:
+    {{- include "paperclip.labels" . | nindent 4 }}
+data:
+  config.json: |
+    {
+      "$meta": {
+        "version": 1,
+        "updatedAt": "{{ now | date "2006-01-02T15:04:05Z07:00" }}",
+        "source": "helm"
+      },
+      "database": {
+        "mode": "postgres",
+        "connectionString": ""
+      },
+      "logging": {
+        "mode": "file",
+        "logDir": "/paperclip/instances/default/logs"
+      },
+      "server": {
+        "deploymentMode": "{{ .Values.server.deploymentMode }}",
+        "exposure": "{{ .Values.server.deploymentExposure }}",
+        "host": "0.0.0.0",
+        "port": {{ .Values.service.containerPort }},
+        "allowedHostnames": [],
+        "serveUi": {{ .Values.server.serveUi }}
+      },
+      "auth": {
+        "baseUrlMode": "{{ .Values.server.authBaseUrlMode }}",
+        "publicBaseUrl": "{{ .Values.server.publicUrl }}",
+        "disableSignUp": {{ .Values.server.authDisableSignUp }}
+      },
+      "storage": {
+        "provider": "{{ .Values.storage.provider }}"
+      },
+      "secrets": {
+        "provider": "{{ .Values.secrets.provider }}",
+        "strictMode": {{ .Values.secrets.strictMode }},
+        "localEncrypted": {
+          "keyFilePath": "/paperclip/instances/default/secrets/master.key"
+        }
+      }
+    }

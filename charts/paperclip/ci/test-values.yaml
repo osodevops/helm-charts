@@ -1,0 +1,20 @@
+postgresql:
+  enabled: true
+  auth:
+    username: paperclip
+    database: paperclip
+    password: testpassword
+storage:
+  provider: local_disk
+secrets:
+  betterAuthSecret: "test-secret-do-not-use-in-production"
+  masterKey: "dGVzdC1tYXN0ZXIta2V5LWRvLW5vdC11c2UtaW4tcHJvZA=="
+ingress:
+  enabled: false
+backup:
+  external:
+    enabled: false
+networkPolicy:
+  enabled: false
+podDisruptionBudget:
+  enabled: false

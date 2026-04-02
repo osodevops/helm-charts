@@ -1,0 +1,14 @@
+{{- if .Values.medialit.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "courselit.fullname" . }}-medialit
+  labels:
+    {{- include "courselit.medialit.labels" . | nindent 4 }}
+data:
+  CLOUD_BUCKET_NAME: {{ .Values.medialit.config.s3.bucketName | quote }}
+  CLOUD_REGION: {{ .Values.medialit.config.s3.region | quote }}
+  {{- if .Values.medialit.config.s3.prefix }}
+  CLOUD_PREFIX: {{ .Values.medialit.config.s3.prefix | quote }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,53 @@
+{{- if and .Values.mongodb.enabled .Values.mongodb.useOperator }}
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
+metadata:
+  name: {{ include "courselit.fullname" . }}-mongodb
+  labels:
+    {{- include "courselit.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mongodb
+spec:
+  members: {{ .Values.mongodb.members }}
+  type: {{ .Values.mongodb.type }}
+  version: {{ .Values.mongodb.version | quote }}
+  security:
+    authentication:
+      modes: ["SCRAM"]
+  users:
+    - name: {{ .Values.mongodb.auth.rootUsername }}
+      db: admin
+      passwordSecretRef:
+        name: {{ .Values.mongodb.auth.existingSecret }}
+        key: {{ .Values.mongodb.auth.secretKey }}
+      roles:
+        - name: root
+          db: admin
+      scramCredentialsSecretName: {{ include "courselit.fullname" . }}-mongodb-scram
+  statefulSet:
+    spec:
+      volumeClaimTemplates:
+        - metadata:
+            name: data-volume
+          spec:
+            {{- if .Values.mongodb.storage.storageClass }}
+            storageClassName: {{ .Values.mongodb.storage.storageClass }}
+            {{- end }}
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: {{ .Values.mongodb.storage.size }}
+      template:
+        spec:
+          containers:
+            - name: mongod
+              resources:
+                {{- toYaml .Values.mongodb.resources | nindent 16 }}
+            - name: mongodb-agent
+              resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "100m"
+                limits:
+                  memory: "256Mi"
+                  cpu: "200m"
+{{- end }}

@@ -1,0 +1,64 @@
+# CI test values - enables MongoDB operator for kind cluster testing
+# This file is used by chart-testing in GitHub Actions workflow
+
+app:
+  config:
+    superAdminEmail: admin@example.com
+
+  # Disable ingress in CI - kind cluster doesn't have ingress controller
+  ingress:
+    enabled: false
+
+  # Gateway API also disabled for CI
+  gateway:
+    enabled: false
+
+  # Use secrets that will be created in CI
+  secrets:
+    authSecretRef:
+      name: courselit-auth
+      key: auth-secret
+    emailSecretRef:
+      name: courselit-email
+      userKey: email-user
+      passKey: email-pass
+      hostKey: email-host
+      fromKey: email-from
+
+mongodb:
+  # Deploy MongoDB in CI
+  enabled: true
+
+  # IMPORTANT: Deploy operator in CI environment
+  # This allows the chart to be tested in kind cluster without pre-installed operator
+  operator:
+    enabled: true
+
+  # Use Standalone for faster CI testing (instead of ReplicaSet)
+  type: Standalone
+  members: 1
+
+  auth:
+    rootUsername: root
+    existingSecret: courselit-mongodb
+    secretKey: password
+
+  # Reduce resources for CI
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+  storage:
+    size: 5Gi  # Smaller for CI
+
+# Disable queue service in default CI test
+queue:
+  enabled: false
+
+# Disable MediaLit in default CI test
+medialit:
+  enabled: false

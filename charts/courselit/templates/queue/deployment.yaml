@@ -1,0 +1,101 @@
+{{- if .Values.queue.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "courselit.fullname" . }}-queue
+  labels:
+    {{- include "courselit.queue.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.queue.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "courselit.queue.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "courselit.queue.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- include "courselit.mongodb.initContainer" . | nindent 8 }}
+        {{- include "courselit.redis.initContainer" . | nindent 8 }}
+      containers:
+        - name: queue
+          image: {{ include "courselit.queue.image" . }}
+          imagePullPolicy: {{ .Values.queue.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "80"
+            - name: DOMAIN
+              value: {{ .Values.queue.config.domain | quote }}
+            - name: PROTOCOL
+              value: {{ .Values.queue.config.protocol | quote }}
+            - name: COURSELIT_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.queue.secrets.courselitJwtSecretRef.name }}
+                  key: {{ .Values.queue.secrets.courselitJwtSecretRef.key }}
+            - name: EMAIL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.secrets.emailSecretRef.name }}
+                  key: {{ .Values.app.secrets.emailSecretRef.userKey }}
+            - name: EMAIL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.secrets.emailSecretRef.name }}
+                  key: {{ .Values.app.secrets.emailSecretRef.passKey }}
+            - name: EMAIL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.secrets.emailSecretRef.name }}
+                  key: {{ .Values.app.secrets.emailSecretRef.hostKey }}
+            {{- if .Values.mongodb.enabled }}
+            - name: DB_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "courselit.fullname" . }}-mongodb-connection
+                  key: connectionString
+            {{- else }}
+            - name: DB_CONNECTION_STRING
+              value: {{ .Values.mongodb.external.connectionString | quote }}
+            {{- end }}
+            - name: REDIS_HOST
+              value: {{ include "courselit.redis.host" . | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.redis.external.port | default 6379 | quote }}
+            {{- if and .Values.redis.external.enabled .Values.redis.external.passwordSecretRef.name }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.redis.external.passwordSecretRef.name }}
+                  key: {{ .Values.redis.external.passwordSecretRef.key }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.queue.resources | nindent 12 }}
+{{- end }}

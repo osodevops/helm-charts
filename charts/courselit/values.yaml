@@ -1,0 +1,322 @@
+# Default values for courselit Helm chart
+
+# Main CourseLIT application
+app:
+  replicaCount: 1
+
+  image:
+    repository: codelit/courselit-app
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  # Application port (use 8080 for non-root, 80 requires root)
+  port: 8080
+
+  config:
+    nodeEnv: production
+    # REQUIRED: Super admin email address
+    superAdminEmail: ""
+
+  # SMTP relay configuration
+  smtp:
+    host: ""      # SMTP relay host (e.g., smtp-relay.example.com)
+    port: 587     # SMTP port
+    user: ""      # SMTP username
+    from: ""      # From email address
+
+  # Secrets referenced via External Secrets Operator
+  secrets:
+    authSecretRef:
+      name: "courselit-auth"
+      key: "auth-secret"
+
+    emailSecretRef:
+      name: "courselit-email"
+      userKey: "email-user"
+      passKey: "email-pass"
+      hostKey: "email-host"
+
+    recaptchaSecretRef:
+      name: ""  # Optional - reCAPTCHA configuration
+      siteKeyKey: "site-key"
+      secretKeyKey: "secret-key"
+
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+  # Node selector - image only available for amd64 architecture
+  nodeSelector:
+    kubernetes.io/arch: amd64
+
+  # Kubernetes service configuration
+  service:
+    type: ClusterIP
+    port: 80
+
+  # Ingress configuration (traditional)
+  ingress:
+    enabled: true
+    className: "nginx"  # Can be changed to traefik, haproxy, alb, etc.
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+      - host: courselit.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: courselit-tls
+        hosts:
+          - courselit.example.com
+
+  # Gateway API configuration (alternative to Ingress)
+  gateway:
+    enabled: false
+    gatewayClassName: "eg"  # e.g., "eg" for Envoy Gateway
+    listeners:
+      - name: http
+        protocol: HTTP
+        port: 80
+      - name: https
+        protocol: HTTPS
+        port: 443
+    hostnames:
+      - courselit.example.com
+    tls:
+      certificateRefs:
+        - name: courselit-tls
+          kind: Secret
+
+# MongoDB configuration
+mongodb:
+  # Set to false to use external MongoDB (e.g., Atlas, DocumentDB)
+  enabled: true
+
+  # MongoDB deployment mode:
+  # - useOperator: false (default) - Deploy simple MongoDB StatefulSet (like docker-compose)
+  #   Best for: Development, testing, small deployments
+  # - useOperator: true - Use MongoDB Community Operator for production-grade deployment
+  #   Best for: Production, high-availability, replica sets
+  #   Requires: MongoDB Community Operator installed in cluster
+  useOperator: false
+
+  # MongoDB Community Operator deployment (when useOperator=true)
+  operator:
+    # Deploy operator as subchart dependency (default: false)
+    # NOTE: This can cause CRD timing issues. It's recommended to install
+    # the operator separately: helm install mongodb-operator mongodb/community-operator
+    enabled: false
+
+  # External MongoDB connection (used when enabled=false)
+  external:
+    connectionString: ""  # Full connection string for external MongoDB
+
+  # Simple MongoDB deployment (used when enabled=true and useOperator=false)
+  simple:
+    image:
+      repository: mongo
+      tag: "8.2"
+      pullPolicy: IfNotPresent
+
+  # Operator-based MongoDB (used when enabled=true and useOperator=true)
+  # Requires MongoDB Community Operator
+  version: "8.2"
+  type: ReplicaSet  # or "Standalone"
+  members: 3
+
+  auth:
+    rootUsername: root
+    # Reference to existing secret containing MongoDB password
+    existingSecret: "courselit-mongodb"
+    secretKey: "password"
+
+  storage:
+    # Use emptyDir instead of PVC (useful for CI/testing, data is not persisted)
+    useEmptyDir: false
+    storageClass: ""  # Use cluster default if not specified
+    size: 10Gi
+
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+mongodb-rbac:
+  operator:
+    enabled: false
+  databaseRoles:
+    create: true
+    namespace: "courselit"
+
+# Queue service (optional)
+queue:
+  enabled: false
+
+  replicaCount: 1
+
+  image:
+    repository: codelit/courselit-queue
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  config:
+    domain: "courselit.example.com"
+    protocol: "https"
+
+  secrets:
+    # Use External Secrets Operator
+    # Should reference same secret as app's authSecret
+    courselitJwtSecretRef:
+      name: "courselit-auth"
+      key: "auth-secret"
+
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+  service:
+    type: ClusterIP
+    port: 80
+
+# Redis/Valkey configuration for queue service
+redis:
+  # External Redis/Valkey instance
+  external:
+    enabled: false
+    host: ""  # External Redis host
+    port: 6379
+    password: ""  # Optional password (leave empty if not using auth)
+    # Reference to secret containing Redis password
+    passwordSecretRef:
+      name: ""
+      key: "redis-password"
+
+# Valkey (Redis replacement) - subchart for in-cluster deployment
+# Only used when queue.enabled=true and valkey.enabled=true
+valkey:
+  enabled: true
+
+  # Valkey subchart values
+  master:
+    persistence:
+      enabled: true
+      size: 8Gi
+  auth:
+    enabled: false  # Can be enabled for security
+
+# MediaLit service (optional)
+medialit:
+  enabled: false
+
+  replicaCount: 1
+
+  image:
+    repository: codelit/medialit
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  config:
+    s3:
+      bucketName: ""  # REQUIRED when enabled
+      region: ""      # REQUIRED when enabled
+      endpoint: ""    # Optional - defaults to AWS S3
+      prefix: ""      # Optional - S3 key prefix
+
+    cloudfront:
+      enabled: false
+      endpoint: ""
+      keyPairId: ""
+      maxAge: "3600"
+
+    enableTrustProxy: false
+
+  # External Secrets for MediaLit
+  externalSecrets:
+    enabled: true
+    secretStore:
+      name: ""  # Name of SecretStore or ClusterSecretStore
+      kind: "SecretStore"  # or "ClusterSecretStore"
+
+    # S3 credentials (if not using IRSA)
+    s3Credentials:
+      enabled: false  # Set to true if not using IRSA
+      keyRef: ""      # Path to AWS_ACCESS_KEY_ID in secret store
+      secretRef: ""   # Path to AWS_SECRET_ACCESS_KEY in secret store
+
+    # CloudFront private key
+    cloudfrontPrivateKey:
+      enabled: false  # Set to true if CloudFront is enabled
+      keyRef: ""      # Path to CloudFront private key in secret store
+
+  # ServiceAccount for IRSA (AWS IAM Role for Service Accounts)
+  serviceAccount:
+    create: true
+    annotations: {}
+    # eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/ROLE_NAME
+    name: ""
+
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+  service:
+    type: ClusterIP
+    port: 80
+
+# Global settings
+nameOverride: ""
+fullnameOverride: ""
+
+# Common labels applied to all resources
+commonLabels: {}
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 1000
+
+# Container security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+# Extra Kubernetes manifests to deploy
+# This allows you to deploy additional resources like ExternalSecrets, ConfigMaps, etc.
+# Example:
+# extraManifests:
+#   - apiVersion: external-secrets.io/v1beta1
+#     kind: ExternalSecret
+#     metadata:
+#       name: "{{ include \"courselit.fullname\" . }}-aws-secret"
+#     spec:
+#       refreshInterval: 1h
+#       secretStoreRef:
+#         name: aws-secretsmanager
+#         kind: ClusterSecretStore
+#       target:
+#         name: courselit-auth
+#         creationPolicy: Owner
+#       data:
+#         - secretKey: auth-secret
+#           remoteRef:
+#             key: courselit/auth-secret
+extraManifests: []

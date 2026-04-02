@@ -1,0 +1,85 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your CourseLIT Learning Management System has been deployed to namespace: {{ .Release.Namespace }}
+
+1. Get the application URL:
+{{- if .Values.app.gateway.enabled }}
+  Gateway API HTTPRoute has been created. Access your application at:
+  {{- range .Values.app.gateway.hostnames }}
+  https://{{ . }}
+  {{- end }}
+
+{{- else if .Values.app.ingress.enabled }}
+  Ingress has been created. Access your application at:
+  {{- range .Values.app.ingress.hosts }}
+  {{- range .paths }}
+  https://{{ .host }}{{ .path }}
+  {{- end }}
+  {{- end }}
+
+  NOTE: It may take a few minutes for the TLS certificate to be issued.
+
+{{- else }}
+  Get the application URL by running:
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "courselit.name" . }},app.kubernetes.io/component=app" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:{{ .Values.app.port }}
+
+  Then visit http://127.0.0.1:8080 in your browser
+{{- end }}
+
+2. Check deployment status:
+  kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/instance={{ .Release.Name }}"
+
+{{- if .Values.mongodb.enabled }}
+
+3. MongoDB status:
+  kubectl get mongodbcommunity -n {{ .Release.Namespace }}
+
+  NOTE: It may take several minutes for the MongoDB replica set to initialize and elect a primary.
+{{- end }}
+
+4. Retrieve super admin login:
+  The super admin user ({{ .Values.app.config.superAdminEmail }}) will receive a magic login link via email.
+  If email is not configured, check the application logs:
+
+  kubectl logs -n {{ .Release.Namespace }} -l "app.kubernetes.io/component=app" --tail=50 | grep -i "magic link"
+
+{{- if not .Values.app.smtp.host }}
+
+  WARNING: SMTP configuration is not set. Email functionality will be disabled.
+  To enable emails, update the SMTP settings in your values file and upgrade the release.
+{{- end }}
+
+5. Optional components:
+{{- if not .Values.queue.enabled }}
+  - Queue service: Currently DISABLED. Enable with --set queue.enabled=true
+{{- else }}
+  - Queue service: ENABLED and processing background jobs
+    Status: kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/component=queue"
+{{- end }}
+
+{{- if not .Values.medialit.enabled }}
+  - MediaLit service: Currently DISABLED. Enable with --set medialit.enabled=true
+{{- else }}
+  - MediaLit service: ENABLED for file storage
+    Status: kubectl get pods -n {{ .Release.Namespace }} -l "app.kubernetes.io/component=medialit"
+{{- end }}
+
+6. Important configuration notes:
+  - SSO/SAML: Must be configured via the web UI after login (Settings → Miscellaneous → Login providers)
+  - Payment gateways: Configure via the web UI (Settings → Payment)
+  - Custom domain: Update DNS records to point to your ingress/gateway
+
+7. Secret management:
+  This chart uses External Secrets Operator for sensitive data.
+  Ensure all referenced secrets exist before deployment:
+  - {{ .Values.app.secrets.authSecretRef.name }} (AUTH_SECRET)
+  - {{ .Values.app.secrets.emailSecretRef.name }} (Email credentials)
+{{- if .Values.mongodb.enabled }}
+  - {{ .Values.mongodb.auth.existingSecret }} (MongoDB password)
+{{- end }}
+
+For more information, visit:
+- Documentation: https://courselit.app/docs
+- GitHub: https://github.com/codelitdev/courselit
+- Discord: https://discord.com/invite/GR4bQsN

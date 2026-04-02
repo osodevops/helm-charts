@@ -16,6 +16,7 @@ keywords:
   - ai
   - agents
   - orchestration
+icon: https://raw.githubusercontent.com/paperclipai/paperclip/main/ui/public/logo.svg
 annotations:
   category: AI
 dependencies:

@@ -21,6 +21,6 @@ annotations:
   category: AI
 dependencies:
   - name: postgresql
-    version: "~16.x"
+    version: "~18.x"
     repository: "https://charts.bitnami.com/bitnami"
     condition: postgresql.enabled

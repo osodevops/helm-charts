@@ -4,6 +4,8 @@ postgresql:
     username: paperclip
     database: paperclip
     password: testpassword
+  metrics:
+    enabled: false
 storage:
   provider: local_disk
 secrets:

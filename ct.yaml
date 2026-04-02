@@ -13,8 +13,13 @@ chart-dirs:
 
 # Chart repositories for dependencies
 chart-repos:
+  - bitnami=https://charts.bitnami.com/bitnami
   - valkey=https://valkey-io.github.io/valkey-helm
   - mongodb=https://mongodb.github.io/helm-charts
+
+# Charts excluded from install testing (image not yet published)
+excluded-charts:
+  - paperclip
 
 # Helm extra arguments
 helm-extra-args: --timeout 600s

@@ -1,0 +1,49 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named: {{ .Release.Name }}
+
+To verify the installation, run:
+
+  kubectl get pods -l "app.kubernetes.io/name={{ include "paperclip.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -n {{ .Release.Namespace }}
+
+{{- if .Values.ingress.enabled }}
+
+Access Paperclip at:
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}
+{{- end }}
+{{- else }}
+
+Access Paperclip via port-forward:
+
+  kubectl port-forward svc/{{ include "paperclip.fullname" . }} 3100:{{ .Values.service.port }} -n {{ .Release.Namespace }}
+
+  Then open: http://localhost:3100
+{{- end }}
+
+{{- if eq .Values.server.deploymentMode "authenticated" }}
+
+BOOTSTRAP: This deployment runs in "authenticated" mode.
+The first user to access the UI will be prompted to claim the instance as the admin.
+{{- end }}
+
+WARNING: Back up the secrets encryption master key!
+Without it, all encrypted secrets stored in Paperclip are irrecoverable.
+Retrieve it with:
+
+  kubectl get secret {{ .Values.secrets.existingMasterKeySecret | default (include "paperclip.secretName" .) }} -n {{ .Release.Namespace }} -o jsonpath='{.data.master-key}' | base64 -d
+
+{{- if .Values.backup.builtin.enabled }}
+
+Built-in database backups: ENABLED
+  Interval: every {{ .Values.backup.builtin.intervalMinutes }} minutes
+  Retention: {{ .Values.backup.builtin.retentionDays }} days
+  Directory: {{ .Values.backup.builtin.directory }}
+{{- end }}
+
+{{- if .Values.backup.external.enabled }}
+
+External pg_dump backups: ENABLED
+  Schedule: {{ .Values.backup.external.schedule }}
+  S3 Bucket: {{ .Values.backup.external.s3Bucket }}
+{{- end }}

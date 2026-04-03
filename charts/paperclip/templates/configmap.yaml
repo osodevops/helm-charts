@@ -11,7 +11,7 @@ data:
   SERVE_UI: {{ .Values.server.serveUi | quote }}
   PAPERCLIP_HOME: "/paperclip"
   PAPERCLIP_INSTANCE_ID: {{ .Values.server.instanceId | quote }}
-  PAPERCLIP_CONFIG: "/paperclip/instances/default/config.json"
+  PAPERCLIP_CONFIG: "/etc/paperclip/config.json"
   PAPERCLIP_DEPLOYMENT_MODE: {{ .Values.server.deploymentMode | quote }}
   PAPERCLIP_DEPLOYMENT_EXPOSURE: {{ .Values.server.deploymentExposure | quote }}
   {{- if .Values.server.publicUrl }}

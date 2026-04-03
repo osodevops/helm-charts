@@ -139,7 +139,7 @@ spec:
             - name: data
               mountPath: /paperclip
             - name: config-json
-              mountPath: /paperclip/instances/default/config.json
+              mountPath: /etc/paperclip/config.json
               subPath: config.json
               readOnly: true
             {{- with .Values.extraVolumeMounts }}

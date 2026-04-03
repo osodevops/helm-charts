@@ -11,6 +11,9 @@ storage:
 secrets:
   betterAuthSecret: "test-secret-do-not-use-in-production"
   masterKey: "dGVzdC1tYXN0ZXIta2V5LWRvLW5vdC11c2UtaW4tcHJvZA=="
+server:
+  publicUrl: "http://localhost:3100"
+  deploymentExposure: "public"
 ingress:
   enabled: false
 backup:

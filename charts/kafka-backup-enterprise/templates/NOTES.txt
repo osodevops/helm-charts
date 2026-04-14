@@ -1,0 +1,57 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named: {{ .Release.Name }}
+
+{{- if .Values.cronjob.enabled }}
+
+SCHEDULED BACKUP:
+  Schedule: {{ .Values.cronjob.schedule }}
+
+  View CronJob status:
+    kubectl get cronjob {{ include "kafka-backup-enterprise.fullname" . }} -n {{ .Release.Namespace }}
+
+  View job history:
+    kubectl get jobs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+  View logs from last run:
+    kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }} --tail=100
+
+  Trigger a backup immediately:
+    kubectl create job --from=cronjob/{{ include "kafka-backup-enterprise.fullname" . }} {{ include "kafka-backup-enterprise.fullname" . }}-manual-$(date +%s) -n {{ .Release.Namespace }}
+{{- end }}
+
+{{- if .Values.job.enabled }}
+
+ONE-SHOT {{ upper .Values.job.command }}:
+  Check status:
+    kubectl get job {{ include "kafka-backup-enterprise.fullname" . }}-job -n {{ .Release.Namespace }}
+  View logs:
+    kubectl logs -n {{ .Release.Namespace }} -l job-name={{ include "kafka-backup-enterprise.fullname" . }}-job -f
+{{- end }}
+
+{{- if not (or .Values.license.existingSecret .Values.license.key) }}
+
+LICENSE:
+  No license configured. The binary will run in auto-trial mode (14 days)
+  or OSS mode if the trial has expired.
+
+  To add a license:
+    kubectl create secret generic {{ include "kafka-backup-enterprise.fullname" . }}-license \
+      --from-literal=license-b64="$(base64 < license.lic)" \
+      -n {{ .Release.Namespace }}
+
+    Then upgrade with:
+      helm upgrade {{ .Release.Name }} ... --set license.existingSecret={{ include "kafka-backup-enterprise.fullname" . }}-license
+{{- end }}
+
+{{- if .Values.metrics.enabled }}
+
+Metrics are available at:
+  kubectl port-forward svc/{{ include "kafka-backup-enterprise.fullname" . }}-metrics {{ .Values.metrics.service.port }}:{{ .Values.metrics.service.port }} -n {{ .Release.Namespace }}
+  curl http://localhost:{{ .Values.metrics.service.port }}{{ .Values.metrics.path }}
+
+  Note: CronJob pods are ephemeral — metrics are only available while a backup is running.
+{{- end }}
+
+For more information, visit:
+  https://kafkabackup.com/enterprise

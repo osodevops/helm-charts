@@ -1,0 +1,11 @@
+{{- if not .Values.config.existingConfigMap }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kafka-backup-enterprise.fullname" . }}-config
+  labels:
+    {{- include "kafka-backup-enterprise.labels" . | nindent 4 }}
+data:
+  backup.yaml: |
+    {{- .Values.config.backupConfig | nindent 4 }}
+{{- end }}

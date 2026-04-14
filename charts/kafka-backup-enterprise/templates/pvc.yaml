@@ -1,0 +1,17 @@
+{{- if .Values.trialPersistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "kafka-backup-enterprise.fullname" . }}-trial
+  labels:
+    {{- include "kafka-backup-enterprise.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.trialPersistence.accessModes | nindent 4 }}
+  {{- if .Values.trialPersistence.storageClassName }}
+  storageClassName: {{ .Values.trialPersistence.storageClassName | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.trialPersistence.size }}
+{{- end }}

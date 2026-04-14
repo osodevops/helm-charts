@@ -1,0 +1,23 @@
+apiVersion: v2
+name: kafka-backup-enterprise
+description: Enterprise Kafka backup with Schema Registry, RBAC, and encryption support
+type: application
+version: 0.1.0
+appVersion: "0.3.1"
+home: https://github.com/osodevops/kafka-backup-enterprise
+sources:
+  - https://github.com/osodevops/kafka-backup-enterprise
+maintainers:
+  - name: OSO DevOps
+    email: dev@oso.sh
+    url: https://oso.sh
+keywords:
+  - kafka
+  - backup
+  - restore
+  - enterprise
+  - schema-registry
+  - disaster-recovery
+icon: https://raw.githubusercontent.com/osodevops/kafka-backup-enterprise/main/docs/icon.png
+annotations:
+  category: Infrastructure

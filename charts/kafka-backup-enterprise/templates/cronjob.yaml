@@ -1,0 +1,127 @@
+{{- if .Values.cronjob.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "kafka-backup-enterprise.fullname" . }}
+  labels:
+    {{- include "kafka-backup-enterprise.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backup
+spec:
+  schedule: {{ .Values.cronjob.schedule | quote }}
+  {{- if .Values.cronjob.timeZone }}
+  timeZone: {{ .Values.cronjob.timeZone | quote }}
+  {{- end }}
+  concurrencyPolicy: {{ .Values.cronjob.concurrencyPolicy }}
+  startingDeadlineSeconds: {{ .Values.cronjob.startingDeadlineSeconds }}
+  successfulJobsHistoryLimit: {{ .Values.cronjob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cronjob.failedJobsHistoryLimit }}
+  suspend: {{ .Values.cronjob.suspend }}
+  jobTemplate:
+    spec:
+      {{- if .Values.cronjob.activeDeadlineSeconds }}
+      activeDeadlineSeconds: {{ .Values.cronjob.activeDeadlineSeconds }}
+      {{- end }}
+      backoffLimit: {{ .Values.cronjob.backoffLimit }}
+      {{- if .Values.cronjob.ttlSecondsAfterFinished }}
+      ttlSecondsAfterFinished: {{ .Values.cronjob.ttlSecondsAfterFinished }}
+      {{- end }}
+      template:
+        metadata:
+          labels:
+            {{- include "kafka-backup-enterprise.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: backup
+            {{- with .Values.podLabels }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if or .Values.metrics.enabled .Values.podAnnotations }}
+          annotations:
+            {{- if .Values.metrics.enabled }}
+            prometheus.io/scrape: "true"
+            prometheus.io/port: {{ .Values.metrics.port | quote }}
+            prometheus.io/path: {{ .Values.metrics.path | quote }}
+            {{- end }}
+            {{- with .Values.podAnnotations }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+        spec:
+          restartPolicy: {{ .Values.cronjob.restartPolicy }}
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          serviceAccountName: {{ include "kafka-backup-enterprise.serviceAccountName" . }}
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          containers:
+            - name: kafka-backup
+              image: {{ include "kafka-backup-enterprise.image" . }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              args:
+                - backup
+                - --config
+                - /config/backup.yaml
+              env:
+                - name: RUST_LOG
+                  value: {{ .Values.logging.level | quote }}
+                {{- if or .Values.license.existingSecret .Values.license.key }}
+                - name: ENTERPRISE_LICENSE_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "kafka-backup-enterprise.licenseSecretName" . }}
+                      key: {{ .Values.license.existingSecretKey | default "license-b64" }}
+                {{- end }}
+                {{- with .Values.extraEnv }}
+                {{- toYaml . | nindent 16 }}
+                {{- end }}
+              {{- if or .Values.credentials.existingSecret .Values.credentials.inline }}
+              envFrom:
+                - secretRef:
+                    name: {{ include "kafka-backup-enterprise.credentialsSecretName" . }}
+              {{- end }}
+              {{- with .Values.resources }}
+              resources:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              securityContext:
+                {{- toYaml .Values.securityContext | nindent 16 }}
+              volumeMounts:
+                - name: config
+                  mountPath: /config
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+                {{- if .Values.trialPersistence.enabled }}
+                - name: trial-state
+                  mountPath: /var/lib/kafka-backup
+                {{- end }}
+                {{- with .Values.extraVolumeMounts }}
+                {{- toYaml . | nindent 16 }}
+                {{- end }}
+          volumes:
+            - name: config
+              configMap:
+                name: {{ include "kafka-backup-enterprise.configMapName" . }}
+            - name: tmp
+              emptyDir: {}
+            {{- if .Values.trialPersistence.enabled }}
+            - name: trial-state
+              persistentVolumeClaim:
+                claimName: {{ include "kafka-backup-enterprise.fullname" . }}-trial
+            {{- end }}
+            {{- with .Values.extraVolumes }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}

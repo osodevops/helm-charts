@@ -5,168 +5,43 @@ metadata:
   labels:
     {{- include "kafka-backup-operator.labels" . | nindent 4 }}
 rules:
-  # Core resources
+  # Read Strimzi resources
+  - apiGroups: ["kafka.strimzi.io"]
+    resources: ["kafkas", "kafkatopics", "kafkausers"]
+    verbs: ["get", "list", "watch"]
+  # Manage backup CRDs
+  - apiGroups: ["kafkabackup.com"]
+    resources: ["kafkabackups", "kafkarestores"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["kafkabackup.com"]
+    resources: ["kafkabackups/status", "kafkarestores/status"]
+    verbs: ["get", "update", "patch"]
+  - apiGroups: ["kafkabackup.com"]
+    resources: ["kafkabackups/finalizers", "kafkarestores/finalizers"]
+    verbs: ["update"]
+  # Create backup/restore jobs
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Read secrets for credentials
   - apiGroups: [""]
-    resources:
-      - secrets
-    verbs:
-      - get
-      - list
-      - watch
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+  # Manage configmaps for job configs
   - apiGroups: [""]
-    resources:
-      - persistentvolumeclaims
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Emit Kubernetes events
   - apiGroups: [""]
-    resources:
-      - events
-    verbs:
-      - create
-      - patch
-
-  # Custom resources - KafkaBackup
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkabackups
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkabackups/status
-    verbs:
-      - get
-      - update
-      - patch
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkabackups/finalizers
-    verbs:
-      - update
-
-  # Custom resources - KafkaRestore
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkarestores
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkarestores/status
-    verbs:
-      - get
-      - update
-      - patch
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkarestores/finalizers
-    verbs:
-      - update
-
-  # Custom resources - KafkaOffsetReset
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkaoffsetresets
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkaoffsetresets/status
-    verbs:
-      - get
-      - update
-      - patch
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkaoffsetresets/finalizers
-    verbs:
-      - update
-
-  # Custom resources - KafkaOffsetRollback
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkaoffsetrollbacks
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkaoffsetrollbacks/status
-    verbs:
-      - get
-      - update
-      - patch
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkaoffsetrollbacks/finalizers
-    verbs:
-      - update
-
-  # Custom resources - KafkaBackupValidation
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkabackupvalidations
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkabackupvalidations/status
-    verbs:
-      - get
-      - update
-      - patch
-  - apiGroups: ["kafka.oso.sh"]
-    resources:
-      - kafkabackupvalidations/finalizers
-    verbs:
-      - update
-
+    resources: ["events"]
+    verbs: ["create", "patch"]
+  # Watch pods for job status
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  # Leader election
   {{- if .Values.leaderElection.enabled }}
-  # Coordination for leader election
   - apiGroups: ["coordination.k8s.io"]
-    resources:
-      - leases
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
+    resources: ["leases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   {{- end }}

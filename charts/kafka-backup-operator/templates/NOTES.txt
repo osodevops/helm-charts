@@ -7,28 +7,37 @@ To verify the installation, run:
   kubectl get pods -l "app.kubernetes.io/name={{ include "kafka-backup-operator.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
 
 The operator is now watching for the following custom resources:
-  - KafkaBackup
-  - KafkaRestore
-  - KafkaOffsetReset
-  - KafkaOffsetRollback
+  - KafkaBackup  (kafkabackup.com/v1alpha1)
+  - KafkaRestore (kafkabackup.com/v1alpha1)
 
 To create a backup, apply a KafkaBackup resource:
 
-  apiVersion: kafka.oso.sh/v1alpha1
+  apiVersion: kafkabackup.com/v1alpha1
   kind: KafkaBackup
   metadata:
-    name: my-backup
+    name: my-cluster-backup
   spec:
-    topics:
-      - "my-topic"
-    kafkaCluster:
-      bootstrapServers:
-        - "kafka:9092"
+    strimziClusterRef:
+      name: my-cluster
     storage:
-      storageType: pvc
-      pvc:
-        claimName: backup-storage
-    schedule: "0 2 * * *"  # Daily at 2 AM
+      type: s3
+      s3:
+        bucket: my-kafka-backups
+        region: us-east-1
+    schedule:
+      cron: "0 2 * * *"  # Daily at 2 AM
+
+To restore from a backup:
+
+  apiVersion: kafkabackup.com/v1alpha1
+  kind: KafkaRestore
+  metadata:
+    name: my-cluster-restore
+  spec:
+    strimziClusterRef:
+      name: my-cluster
+    backupRef:
+      name: my-cluster-backup
 
 For more information, visit:
   https://github.com/osodevops/kafka-backup-operator
@@ -36,6 +45,6 @@ For more information, visit:
 {{- if .Values.metrics.enabled }}
 
 Metrics are available at:
-  kubectl port-forward svc/{{ include "kafka-backup-operator.fullname" . }}-metrics 8080:8080
-  curl http://localhost:8080/metrics
+  kubectl port-forward svc/{{ include "kafka-backup-operator.fullname" . }}-metrics {{ .Values.service.port }}:{{ .Values.service.port }}
+  curl http://localhost:{{ .Values.service.port }}/metrics
 {{- end }}

@@ -34,18 +34,28 @@ azureWorkloadIdentity:
   # This should match the identity federated with this service account
   clientId: ""
 
+# Namespaces to watch (empty = all namespaces)
+watchNamespaces: []
+
+# Logging configuration
+logging:
+  level: "info,kafka_backup_operator=debug"
+  format: json
+
 # Pod annotations
 podAnnotations:
   prometheus.io/scrape: "true"
-  prometheus.io/port: "8080"
+  prometheus.io/port: "9090"
   prometheus.io/path: "/metrics"
+
+podLabels: {}
 
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 1000
   fsGroup: 1000
 
-securityContext:
+containerSecurityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
   capabilities:
@@ -55,7 +65,7 @@ securityContext:
 # Metrics service configuration
 service:
   type: ClusterIP
-  port: 8080
+  port: 9090
   annotations: {}
 
 resources:
@@ -73,25 +83,12 @@ tolerations: []
 
 affinity: {}
 
-# Extra pod volumes to mount into the operator pod
-extraVolumes: []
-
-# Extra volume mounts for the operator container
-extraVolumeMounts: []
-
-# Extra environment variables for the operator container
-extraEnv: []
-
-# Logging configuration
-logging:
-  level: "info,kafka_backup_operator=debug"
-  format: json
-
 # Metrics configuration
 metrics:
   enabled: true
   serviceMonitor:
     enabled: false
+    namespace: ""
     interval: 30s
     scrapeTimeout: 10s
     labels: {}

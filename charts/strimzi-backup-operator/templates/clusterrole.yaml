@@ -10,13 +10,13 @@ rules:
     resources: ["kafkas", "kafkatopics", "kafkausers"]
     verbs: ["get", "list", "watch"]
   # Manage backup CRDs
-  - apiGroups: ["backup.strimzi.io"]
+  - apiGroups: ["kafkabackup.com"]
     resources: ["kafkabackups", "kafkarestores"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-  - apiGroups: ["backup.strimzi.io"]
+  - apiGroups: ["kafkabackup.com"]
     resources: ["kafkabackups/status", "kafkarestores/status"]
     verbs: ["get", "update", "patch"]
-  - apiGroups: ["backup.strimzi.io"]
+  - apiGroups: ["kafkabackup.com"]
     resources: ["kafkabackups/finalizers", "kafkarestores/finalizers"]
     verbs: ["update"]
   # Create backup/restore jobs

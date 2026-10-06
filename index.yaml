@@ -744,6 +744,36 @@ entries:
       artifacthub.io/license: Apache-2.0
       category: Infrastructure
     apiVersion: v2
+    appVersion: 0.4.0
+    created: "2026-10-06T10:33:02.770601711Z"
+    description: Kubernetes operator for Kafka backup and restore, integrated with
+      Strimzi
+    digest: 268929e26b7940a706be589bcc4556ac4961aec06b8b176e61610d49c23ee39d
+    home: https://github.com/osodevops/strimzi-backup-operator
+    keywords:
+    - strimzi
+    - kafka
+    - backup
+    - restore
+    - kubernetes
+    - operator
+    - disaster-recovery
+    maintainers:
+    - email: dev@oso.sh
+      name: sionsmith
+      url: https://osodevops.io
+    name: strimzi-backup-operator
+    sources:
+    - https://github.com/osodevops/strimzi-backup-operator
+    type: application
+    urls:
+    - https://github.com/osodevops/helm-charts/releases/download/strimzi-backup-operator-0.4.0/strimzi-backup-operator-0.4.0.tgz
+    version: 0.4.0
+  - annotations:
+      artifacthub.io/disclaimer: Not affiliated with the Strimzi project or CNCF
+      artifacthub.io/license: Apache-2.0
+      category: Infrastructure
+    apiVersion: v2
     appVersion: 0.3.1
     created: "2026-09-07T11:29:32.908722862Z"
     description: Kubernetes operator for Kafka backup and restore, integrated with
@@ -1377,4 +1407,4 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/strimzi-backup-operator-0.1.0/strimzi-backup-operator-0.1.0.tgz
     version: 0.1.0
-generated: "2026-09-07T11:29:32.908935596Z"
+generated: "2026-10-06T10:33:02.770755789Z"

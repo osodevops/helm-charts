@@ -105,6 +105,32 @@ entries:
   - annotations:
       category: Infrastructure
     apiVersion: v2
+    appVersion: 1.4.4
+    created: "2026-10-09T14:10:11.295045209Z"
+    description: A Kubernetes operator for managing Kafka backup and restore operations
+    digest: e4f2d382c76b632d1b00d58b93fa52766b71f12dc7b1e96cde71a47ba0d2b321
+    home: https://github.com/osodevops/kafka-backup-operator
+    icon: https://raw.githubusercontent.com/osodevops/kafka-backup-operator/main/docs/icon.png
+    keywords:
+    - kafka
+    - backup
+    - restore
+    - operator
+    - disaster-recovery
+    maintainers:
+    - email: dev@oso.sh
+      name: sionsmith
+      url: https://github.com/sionsmith
+    name: kafka-backup-operator
+    sources:
+    - https://github.com/osodevops/kafka-backup-operator
+    type: application
+    urls:
+    - https://github.com/osodevops/helm-charts/releases/download/kafka-backup-operator-1.4.4/kafka-backup-operator-1.4.4.tgz
+    version: 1.4.4
+  - annotations:
+      category: Infrastructure
+    apiVersion: v2
     appVersion: 1.4.3
     created: "2026-10-09T11:30:33.715749808Z"
     description: A Kubernetes operator for managing Kafka backup and restore operations
@@ -1459,4 +1485,4 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/strimzi-backup-operator-0.1.0/strimzi-backup-operator-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-09T11:30:33.715950783Z"
+generated: "2026-10-09T14:10:11.295213472Z"

@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "kafka-backup-enterprise.fullname" . }}-test-license
+  labels:
+    {{- include "kafka-backup-enterprise.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  {{- with .Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  serviceAccountName: {{ include "kafka-backup-enterprise.serviceAccountName" . }}
+  securityContext:
+    {{- toYaml .Values.podSecurityContext | nindent 4 }}
+  containers:
+    - name: test-license
+      image: {{ include "kafka-backup-enterprise.image" . }}
+      imagePullPolicy: {{ .Values.image.pullPolicy }}
+      args:
+        - license
+        - info
+      env:
+        {{- if or .Values.license.existingSecret .Values.license.key }}
+        - name: ENTERPRISE_LICENSE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kafka-backup-enterprise.licenseSecretName" . }}
+              key: {{ .Values.license.existingSecretKey | default "license-b64" }}
+        {{- end }}
+      securityContext:
+        {{- toYaml .Values.securityContext | nindent 8 }}

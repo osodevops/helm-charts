@@ -42,7 +42,8 @@ job:
 image:
   repository: osodevops/kafka-backup-enterprise
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion
+  # Overrides the image tag. Default: "v" + the chart appVersion (e.g. v0.6.1),
+  # matching the tags the release workflow pushes.
   tag: ""
 
 imagePullSecrets: []

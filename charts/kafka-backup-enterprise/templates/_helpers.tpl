@@ -65,7 +65,7 @@ Create the name of the service account to use
 Return the proper image name.
 Release images are tagged "v<version>" (release.yml, docker/metadata-action
 pattern v{{version}}), so the default tag is the chart appVersion with a "v"
-prefix: appVersion 0.6.0 resolves to osodevops/kafka-backup-enterprise:v0.6.0.
+prefix: appVersion 0.7.0 resolves to osodevops/kafka-backup-enterprise:v0.7.0.
 */}}
 {{- define "kafka-backup-enterprise.image" -}}
 {{- $tag := default (printf "v%s" (trimPrefix "v" .Chart.AppVersion)) .Values.image.tag -}}

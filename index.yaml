@@ -76,6 +76,34 @@ entries:
   - annotations:
       category: Infrastructure
     apiVersion: v2
+    appVersion: 0.7.0
+    created: "2026-10-14T18:27:30.245688068Z"
+    description: Enterprise Kafka backup with Schema Registry, RBAC, and encryption
+      support
+    digest: 5b1b4d4d824373e7c62cb6f6f151ec6096fbb2d6f6bc50ec1a567a21570eb996
+    home: https://github.com/osodevops/kafka-backup-enterprise
+    icon: https://raw.githubusercontent.com/osodevops/kafka-backup-enterprise/main/docs/icon.png
+    keywords:
+    - kafka
+    - backup
+    - restore
+    - enterprise
+    - schema-registry
+    - disaster-recovery
+    maintainers:
+    - email: dev@oso.sh
+      name: OSO DevOps
+      url: https://oso.sh
+    name: kafka-backup-enterprise
+    sources:
+    - https://github.com/osodevops/kafka-backup-enterprise
+    type: application
+    urls:
+    - https://github.com/osodevops/helm-charts/releases/download/kafka-backup-enterprise-0.7.0/kafka-backup-enterprise-0.7.0.tgz
+    version: 0.7.0
+  - annotations:
+      category: Infrastructure
+    apiVersion: v2
     appVersion: 0.6.1
     created: "2026-10-13T19:41:41.22092543Z"
     description: Enterprise Kafka backup with Schema Registry, RBAC, and encryption
@@ -1567,4 +1595,4 @@ entries:
     urls:
     - https://github.com/osodevops/helm-charts/releases/download/strimzi-backup-operator-0.1.0/strimzi-backup-operator-0.1.0.tgz
     version: 0.1.0
-generated: "2026-10-14T17:42:09.991554742Z"
+generated: "2026-10-14T18:27:30.245784349Z"

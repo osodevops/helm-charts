@@ -1,8 +1,12 @@
-{{- if .Values.trialPersistence.enabled }}
+{{- if and .Values.trialPersistence.enabled (not .Values.trialPersistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ include "kafka-backup-enterprise.fullname" . }}-trial
+  {{- if .Values.trialPersistence.retainOnDelete }}
+  annotations:
+    helm.sh/resource-policy: keep
+  {{- end }}
   labels:
     {{- include "kafka-backup-enterprise.labels" . | nindent 4 }}
 spec:

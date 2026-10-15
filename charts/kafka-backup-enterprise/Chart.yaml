@@ -2,8 +2,8 @@ apiVersion: v2
 name: kafka-backup-enterprise
 description: Enterprise Kafka backup with Schema Registry, RBAC, and encryption support
 type: application
-version: 0.7.0
-appVersion: "0.7.0"
+version: 0.8.0
+appVersion: "0.8.0"
 home: https://github.com/osodevops/kafka-backup-enterprise
 sources:
   - https://github.com/osodevops/kafka-backup-enterprise

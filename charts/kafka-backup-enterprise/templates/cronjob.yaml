@@ -107,7 +107,7 @@ spec:
             {{- if .Values.trialPersistence.enabled }}
             - name: trial-state
               persistentVolumeClaim:
-                claimName: {{ include "kafka-backup-enterprise.fullname" . }}-trial
+                claimName: {{ .Values.trialPersistence.existingClaim | default (printf "%s-trial" (include "kafka-backup-enterprise.fullname" .)) | quote }}
             {{- end }}
             {{- with .Values.extraVolumes }}
             {{- toYaml . | nindent 12 }}

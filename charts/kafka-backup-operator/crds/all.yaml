@@ -44,7 +44,7 @@ spec:
                 properties:
                   enabled:
                     default: true
-                    description: Enable checkpointing
+                    description: Enable checkpointing. A non-continuous backup with checkpointing enabled writes every run into one backup set named after the resource (`status.backupId` equals the resource name) and resumes from the checkpoint the previous run stored, so scheduled runs are incremental. Set to false (or omit the `checkpoint` block) for standalone full backups, each in its own timestamped backup set.
                     type: boolean
                   intervalSecs:
                     default: 30
@@ -117,6 +117,11 @@ spec:
                 default: false
                 description: Run continuously instead of completing after one pass
                 type: boolean
+              excludeTopics:
+                description: 'Topics to leave out, names or globs (* and ?). Applied after `topics`, so `topics: ["*"]` with an exclude list also backs up every topic created later.'
+                items:
+                  type: string
+                type: array
               includeOffsetHeaders:
                 default: true
                 description: 'Add `x-original-offset` / `x-original-timestamp` headers to every archived record (Phase 1 of the three-phase restore). Default: true. Set to false for an archive whose records carry only their original headers.'
@@ -164,6 +169,13 @@ spec:
                         description: Time in seconds before the first keepalive probe
                         format: uint64
                         minimum: 0.0
+                        type: integer
+                      produceApiVersion:
+                        description: 'Produce API version to send, 7 or 8 (unset: 8). Only Produce requests follow it, so it matters for `KafkaRestore`; the other resources accept and ignore it. The client does not negotiate API versions yet (`ApiVersions`), so set it for a target broker whose maximum is lower: Redpanda advertises Produce 0..7 and drops the connection on 8, which surfaces as `early eof` on every topic. Versions 7 and 8 send the same request (8 only adds per-record error detail to the response). Versions below 7 are rejected: every batch the client produces is zstd-compressed, which brokers accept from Produce version 7.'
+                        format: int16
+                        maximum: 8.0
+                        minimum: 7.0
+                        nullable: true
                         type: integer
                       tcpKeepalive:
                         default: true
@@ -279,7 +291,7 @@ spec:
                 properties:
                   bytesPerSec:
                     default: 0
-                    description: Maximum bytes per second (0 = unlimited)
+                    description: Maximum bytes per second (each record's encoded size) for the whole run, shared by all partitions (0 = unlimited). Applied to backups since 1.7.0
                     format: uint64
                     minimum: 0.0
                     type: integer
@@ -291,7 +303,7 @@ spec:
                     type: integer
                   recordsPerSec:
                     default: 0
-                    description: Maximum records per second (0 = unlimited)
+                    description: Maximum records per second for the whole run, shared by all partitions (0 = unlimited). Applied to backups since 1.7.0
                     format: uint64
                     minimum: 0.0
                     type: integer
@@ -562,7 +574,7 @@ spec:
             nullable: true
             properties:
               backupId:
-                description: Current backup ID
+                description: 'Backup set written by the last run: the resource name for incremental backups, `{name}-{YYYYMMDD-HHMMSS}` for full backups.'
                 nullable: true
                 type: string
               bytesProcessed:
@@ -649,7 +661,7 @@ spec:
                 nullable: true
                 type: integer
               resumable:
-                description: Whether the backup can be resumed
+                description: Whether runs of this backup resume one backup set (checkpointing enabled on a non-continuous backup) rather than each writing a full backup.
                 nullable: true
                 type: boolean
               retentionDeletedBackups:
@@ -1068,6 +1080,13 @@ spec:
                         format: uint64
                         minimum: 0.0
                         type: integer
+                      produceApiVersion:
+                        description: 'Produce API version to send, 7 or 8 (unset: 8). Only Produce requests follow it, so it matters for `KafkaRestore`; the other resources accept and ignore it. The client does not negotiate API versions yet (`ApiVersions`), so set it for a target broker whose maximum is lower: Redpanda advertises Produce 0..7 and drops the connection on 8, which surfaces as `early eof` on every topic. Versions 7 and 8 send the same request (8 only adds per-record error detail to the response). Versions below 7 are rejected: every batch the client produces is zstd-compressed, which brokers accept from Produce version 7.'
+                        format: int16
+                        maximum: 8.0
+                        minimum: 7.0
+                        nullable: true
+                        type: integer
                       tcpKeepalive:
                         default: true
                         description: Enable TCP keepalive
@@ -1206,7 +1225,7 @@ spec:
                 properties:
                   bytesPerSec:
                     default: 0
-                    description: Maximum bytes per second (0 = unlimited)
+                    description: Maximum bytes per second (each record's encoded size) for the whole run, shared by all partitions (0 = unlimited). Applied to backups since 1.7.0
                     format: uint64
                     minimum: 0.0
                     type: integer
@@ -1218,7 +1237,7 @@ spec:
                     type: integer
                   recordsPerSec:
                     default: 0
-                    description: Maximum records per second (0 = unlimited)
+                    description: Maximum records per second for the whole run, shared by all partitions (0 = unlimited). Applied to backups since 1.7.0
                     format: uint64
                     minimum: 0.0
                     type: integer
@@ -1522,6 +1541,13 @@ spec:
                         description: Time in seconds before the first keepalive probe
                         format: uint64
                         minimum: 0.0
+                        type: integer
+                      produceApiVersion:
+                        description: 'Produce API version to send, 7 or 8 (unset: 8). Only Produce requests follow it, so it matters for `KafkaRestore`; the other resources accept and ignore it. The client does not negotiate API versions yet (`ApiVersions`), so set it for a target broker whose maximum is lower: Redpanda advertises Produce 0..7 and drops the connection on 8, which surfaces as `early eof` on every topic. Versions 7 and 8 send the same request (8 only adds per-record error detail to the response). Versions below 7 are rejected: every batch the client produces is zstd-compressed, which brokers accept from Produce version 7.'
+                        format: int16
+                        maximum: 8.0
+                        minimum: 7.0
+                        nullable: true
                         type: integer
                       tcpKeepalive:
                         default: true
@@ -1848,6 +1874,13 @@ spec:
                         description: Time in seconds before the first keepalive probe
                         format: uint64
                         minimum: 0.0
+                        type: integer
+                      produceApiVersion:
+                        description: 'Produce API version to send, 7 or 8 (unset: 8). Only Produce requests follow it, so it matters for `KafkaRestore`; the other resources accept and ignore it. The client does not negotiate API versions yet (`ApiVersions`), so set it for a target broker whose maximum is lower: Redpanda advertises Produce 0..7 and drops the connection on 8, which surfaces as `early eof` on every topic. Versions 7 and 8 send the same request (8 only adds per-record error detail to the response). Versions below 7 are rejected: every batch the client produces is zstd-compressed, which brokers accept from Produce version 7.'
+                        format: int16
+                        maximum: 8.0
+                        minimum: 7.0
+                        nullable: true
                         type: integer
                       tcpKeepalive:
                         default: true
@@ -2381,7 +2414,7 @@ spec:
                   formats:
                     default:
                     - json
-                    description: Output formats (json, pdf)
+                    description: 'Output formats: json, pdf (case-insensitive). Signing always stores the JSON report, since the signature covers its bytes'
                     items:
                       type: string
                     type: array
@@ -2400,7 +2433,7 @@ spec:
                         description: Enable ECDSA-P256-SHA256 signing
                         type: boolean
                       keySecret:
-                        description: Secret containing the ECDSA private key (PEM-encoded)
+                        description: Secret containing the ECDSA P-256 private key (PEM-encoded PKCS#8, `-----BEGIN PRIVATE KEY-----`)
                         properties:
                           name:
                             description: Secret name
@@ -2420,7 +2453,7 @@ spec:
                     - keySecret
                     type: object
                   storage:
-                    description: Storage location for evidence reports
+                    description: Storage location for evidence reports (defaults to the backup's storage). Reports are written under `evidence-reports/` within it
                     nullable: true
                     properties:
                       azure:
@@ -2664,6 +2697,13 @@ spec:
                         format: uint64
                         minimum: 0.0
                         type: integer
+                      produceApiVersion:
+                        description: 'Produce API version to send, 7 or 8 (unset: 8). Only Produce requests follow it, so it matters for `KafkaRestore`; the other resources accept and ignore it. The client does not negotiate API versions yet (`ApiVersions`), so set it for a target broker whose maximum is lower: Redpanda advertises Produce 0..7 and drops the connection on 8, which surfaces as `early eof` on every topic. Versions 7 and 8 send the same request (8 only adds per-record error detail to the response). Versions below 7 are rejected: every batch the client produces is zstd-compressed, which brokers accept from Produce version 7.'
+                        format: int16
+                        maximum: 8.0
+                        minimum: 7.0
+                        nullable: true
+                        type: integer
                       tcpKeepalive:
                         default: true
                         description: Enable TCP keepalive
@@ -2879,14 +2919,30 @@ spec:
                   - type
                   type: object
                 type: array
+              evidencePdfPath:
+                description: Key of the PDF evidence report of the last completed validation
+                nullable: true
+                type: string
+              evidenceReportId:
+                description: ID of the evidence report of the last completed validation; the directory and file stem of its artifacts in evidence storage
+                nullable: true
+                type: string
               evidenceReportPath:
-                description: Path to evidence report in storage
+                description: Key of the JSON evidence report of the last completed validation. Evidence keys are relative to the evidence storage (`spec.evidence.storage`, or the backup's storage when unset) and its prefix, e.g. `evidence-reports/<id>/<yyyy>/<mm>/<id>.json`
+                nullable: true
+                type: string
+              evidenceReportSha256:
+                description: Lowercase hex SHA-256 of the exact stored JSON evidence report bytes
                 nullable: true
                 type: string
               evidenceReportSigned:
                 description: Whether the evidence report is cryptographically signed
                 nullable: true
                 type: boolean
+              evidenceSignaturePath:
+                description: Key of the detached signature envelope of the last completed validation (when signing is enabled)
+                nullable: true
+                type: string
               lastValidationTime:
                 description: Last successful validation time
                 format: date-time
